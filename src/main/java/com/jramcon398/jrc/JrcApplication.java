@@ -7,6 +7,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @SpringBootApplication
 @Slf4j
@@ -18,12 +21,20 @@ public class JrcApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        File file = new File("ejemplo.txt");
-        if (file.createNewFile()) {
-            log.info("Fichero creado: {}", file.getName());
-        } else {
-            log.warn("El fichero ya existe.");
-            log.info("El fichero existe en: {}", file.getAbsolutePath()); //Ruta del fichero en el disco.
+        Path ruta = Paths.get("ejemploNIO.txt");
+        if (!Files.exists(ruta)) {
+            Files.createFile(ruta);
+            log.info("Fichero creado con NIO.2");
         }
+        else{
+            log.warn("Fichero ya creado con NIO.2 en {}",ruta.getFileName());
+        }
+        // Escribir texto en el fichero
+        Files.write(ruta, "Hola mundo desde NIO.2".getBytes());
+
+        // Leer el contenido
+        String contenido = Files.readString(ruta);
+        log.info("Contenido: {}", contenido);
+
     }
 }
