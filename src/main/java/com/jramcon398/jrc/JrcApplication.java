@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,20 +22,13 @@ public class JrcApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Path ruta = Paths.get("ejemploNIO.txt");
-        if (!Files.exists(ruta)) {
-            Files.createFile(ruta);
-            log.info("Fichero creado con NIO.2");
-        }
-        else{
-            log.warn("Fichero ya creado con NIO.2 en {}",ruta.getFileName());
-        }
-        // Escribir texto en el fichero
-        Files.write(ruta, "Hola mundo desde NIO.2".getBytes());
+        Path ruta = Paths.get("alumnos.txt");
+        // Escribir en el fichero
+        Files.writeString(ruta, "ID,Nombre\n1,Ana\n2,Juan", StandardCharsets.UTF_8);
+        // Leer del fichero
+        String contenido = Files.readString(ruta, StandardCharsets.UTF_8);
+        log.info("Contenido del fichero:\n{}", contenido);
 
-        // Leer el contenido
-        String contenido = Files.readString(ruta);
-        log.info("Contenido: {}", contenido);
 
     }
 }
