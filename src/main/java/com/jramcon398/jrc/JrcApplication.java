@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
+/// CLASE QUE EJECUTA LA APLICACIÓN. USA LA CLASE  FILEMANAGER PARA ESO
+
 @SpringBootApplication
 @Slf4j
 public class JrcApplication implements CommandLineRunner {
