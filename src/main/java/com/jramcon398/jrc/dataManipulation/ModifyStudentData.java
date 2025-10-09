@@ -10,14 +10,13 @@ import java.io.RandomAccessFile;
 import java.util.Scanner;
 
 
-/// Clase ModifyStudentData: Clase para modificar la nota de un alumno en una posición específica
-///                          Las clases contenidas en dataManipulation se encargan de las operaciones
-///                          de inserción, consulta y modificación de los registros de alumnos.
-///                          (Utilizan la clase DataRW para las operaciones de lectura y escritura
-///                          en el archivo binario.)
-///
-///                          Utiliza la clase GetStudentDataByPosition para obtener la posición
-///                          del alumno a modificar.
+/// Class ModifyStudentData: Class to modify a student's grade in a specific position
+///                          The classes contained in dataManipulation are responsible for operations
+///                          insertion, consultation and modification of student records.
+///                          (They use the DataRW class for read and write operations
+///                          in the binary file.)
+///                          Use the GetStudentDataByPosition class to get the position
+///                          of the student to be modified.
 
 @SpringBootApplication
 @Slf4j
@@ -25,7 +24,7 @@ import java.util.Scanner;
 public class ModifyStudentData {
 
     private static final int NAME_LENGTH = 20;
-    private static final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4; // 4 bytes por id + 20 caracteres * 2 bytes/caracteres + 4 bytes por integer (nota) = 48
+    private static final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4; // 4 bytes id + 20 characters * 2 bytes/character + 4 bytes float (nota) = 48
 
     public ModifyStudentData() {
 
@@ -36,15 +35,15 @@ public class ModifyStudentData {
         int pos = studentDataByPosition.getStudentInfoByPosition(file);
 
         if (pos == -1) {
-            log.warn("No se pudo modificar la nota debido a un error en la posición.");
+            log.warn("Could not modify grade because an error on input position.");
             return;
         }
 
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-            // Nos movemos al inicio del registro deseado
+            // Getting to the position of the student. Each record takes 48 bytes.
             raf.seek(pos * RECORD_SIZE);
 
-            // Leemos el ID y el nombre para mantenerlos
+            // Mantain id and name, only modify grade
             int id = raf.readInt();
             char[] nameChars = new char[NAME_LENGTH];
             for (int i = 0; i < NAME_LENGTH; i++) {
@@ -56,31 +55,31 @@ public class ModifyStudentData {
             String input;
             float grade = -1;
 
-            //Validación de la nueva nota
+            //Grade validation
             do {
-                log.info("Ingrese la nueva nota (0-10): ");
+                log.info("Enter a new grade (0-10): ");
                 input = scanner.next();
-                if (InputValidator.isDouble(input)) {
+                if (InputValidator.isFloat(input)) {
                     grade = Float.parseFloat(input);
                     if (InputValidator.isValidGrade(grade)) {
                         break;
                     } else {
-                        log.warn("Nota inválida. Debe estar entre 0 y 10.");
+                        log.warn("Invalid grade. Must be between 0 y 10.");
                     }
                 } else {
-                    log.warn("Entrada inválida. Por favor, ingrese un número válido.");
+                    log.warn("Invalid input. Please, enter a valid number.");
                 }
             } while (true);
 
-            // Ahora escribimos la nueva nota en la posición correcta
+            // Now we write the new grade
             raf.writeFloat(grade);
             log.warn("------------------------------------------------------------------------------");
-            log.info("Alumno leído [{}]: ID: {}, Nombre: {}, Nota: {}", pos, id, name, grade);
-            log.info("Nota del alumno en posición {} modificada exitosamente a {}.", pos, grade);
+            log.info("Student read: [{}]: ID: {}, Nombre: {}, Nota: {}", pos, id, name, grade);
+            log.info("Student's grade at position {} properly modified {}.", pos, grade);
             log.warn("------------------------------------------------------------------------------");
 
         } catch (IOException e) {
-            log.error("Error durante la modificación del archivo: {} ", e.getMessage());
+            log.error("Error modifying file: {} ", e.getMessage());
         }
 
 

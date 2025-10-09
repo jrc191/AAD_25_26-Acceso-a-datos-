@@ -9,18 +9,17 @@ import java.io.RandomAccessFile;
 import java.util.Scanner;
 
 
-/// Clase GetStudentDataByPosition: Clase para consultar la información de un alumno en una posición específica
-///                                 Las clases contenidas en dataManipulation se encargan de las operaciones
-///                                 de inserción, consulta y modificación de los registros de alumnos.
-///                                 (Utilizan la clase DataRW para las operaciones de lectura y escritura
-///                                 en el archivo binario.)
+/// Class GetStudentDataByPosition: Class to check student's info in a certain position
+///                                 Obtained classes in dataManipulation handle operations
+///                                 of student's records.
+///                                 (They use DataRW to read and write in the binary file)
 
 @SpringBootApplication
 @Slf4j
 public class GetStudentDataByPosition {
 
     private static final int NAME_LENGTH = 20;
-    private static final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4; // 4 bytes por id + 20 caracteres * 2 bytes/caracteres + 4 bytes por integer (nota) = 48
+    private static final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4; // 4 bytes id + 20 characters * 2 bytes/character + 4 bytes float (nota) = 48
 
     public GetStudentDataByPosition() {
 
@@ -31,43 +30,43 @@ public class GetStudentDataByPosition {
         Scanner scanner = new Scanner(System.in);
 
         if (file == null || !file.exists() || file.length() == 0) {
-            log.warn("El archivo no existe o está vacío.");
+            log.warn("File does not exist or is empty.");
             return -1;
         }
 
         long totalRecords = file.length() / RECORD_SIZE;
 
-        log.info("Total de registros en el archivo: {} ", totalRecords);
-        log.info("Recuerde: La posición a introducir debe estar entre 0 y {}", (totalRecords - 1));
+        log.info("Total file records: {} ", totalRecords);
+        log.info("Remember: Position must be between 0 and {}", (totalRecords - 1));
 
         String input= scanner.next();
         int pos=-1;
 
         do{
             try {
-                //Probamos a parsear la posición a ver si es entero
+                //Parse the input to an integer
                 pos = Integer.parseInt(input);
                 break;
             }
             catch (NumberFormatException e) {
-                log.warn("Entrada inválida. Por favor, ingrese un número entero.");
+                log.warn("Invalid input. Please, enter a valid number.");
             }
         } while (true);
 
 
         if (pos < 0 || pos >= totalRecords) {
-            log.warn("Posición inválida. Debe estar entre 0 y {}", (totalRecords - 1));
+            log.warn("Invalid Position. Position must be between 0 and {}", (totalRecords - 1));
             return -1;
         }
 
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             log.warn("------------------------------------------------------------------------------");
-            log.info("LECTURA DE ALUMNOS");
+            log.info("STUDENT INFO AT POSITION: {}", pos);
 
-            // Nos movemos al inicio del registro deseado
+            // Go to the position of the student. Each record takes 48 bytes.
             raf.seek(pos * RECORD_SIZE);
 
-            // Leemos el registro
+            // Reading record data
             int id = raf.readInt();
 
             char[] nameChars = new char[NAME_LENGTH];
@@ -78,13 +77,13 @@ public class GetStudentDataByPosition {
 
             float grade = raf.readFloat();
 
-            log.info("Alumno leído [{}]: ID: {}, Nombre: {}, Nota: {}", pos, id, name, grade);
+            log.info("Student [{}]: ID: {}, Name: {}, Grade: {}", pos, id, name, grade);
 
             log.warn("------------------------------------------------------------------------------");
 
 
         } catch (IOException e) {
-            log.error("Error durante la lectura del archivo: {}", e.getMessage());
+            log.error("Error reading file: {}", e.getMessage());
         }
 
         return pos;

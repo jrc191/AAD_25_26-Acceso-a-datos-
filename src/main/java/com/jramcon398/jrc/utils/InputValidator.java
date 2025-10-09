@@ -1,5 +1,10 @@
 package com.jramcon398.jrc.utils;
 
+/// Class InputValidator: Utility class for validating user inputs.
+/// Provides methods to check if a string can be parsed as an integer or float,
+/// if a grade is within a valid range, and if a string is non-empty.
+
+
 public class InputValidator {
 
     public static boolean isInteger(String input) {
@@ -11,9 +16,9 @@ public class InputValidator {
         }
     }
 
-    public static boolean isDouble(String input) {
+    public static boolean isFloat(String input) {
         try {
-            Double.parseDouble(input);
+            Float.parseFloat(input);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -25,7 +30,7 @@ public class InputValidator {
     }
 
     public static boolean isNonEmptyString(String input) {
-        //Devolvemos true si la cadena no es ni nula ni está vacía
+        //Return true if the string is not null and not empty after trimming whitespace
         return input != null && !input.trim().isEmpty();
     }
 

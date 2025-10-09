@@ -1,7 +1,7 @@
 package com.jramcon398.jrc.dataManipulation;
 
 import com.jramcon398.jrc.dataReaderWriter.DataRW;
-import com.jramcon398.jrc.models.Alumno;
+import com.jramcon398.jrc.models.Student;
 import com.jramcon398.jrc.utils.InputValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,11 +10,10 @@ import java.io.File;
 import java.util.Scanner;
 
 
-/// Clase InsertStudentData: Clase para insertar un alumno de manera secuencial
-///                          Las clases contenidas en dataManipulation se encargan de las operaciones
-///                          de inserción, consulta y modificación de los registros de alumnos.
-///                          (Utilizan la clase DataRW para las operaciones de lectura y escritura
-///                          en el archivo binario.)
+/// Class InsertStudentData: Class to insert new student data (sequentially).
+///                          Classes in dataManipulation handle operations
+///                          of insert data, checking student's info and registry modification.
+///                          (They use DataRW to read and write student in binary file.)
 
 @SpringBootApplication
 @Slf4j
@@ -29,9 +28,9 @@ public class InsertStudentData {
         float grade = -1;
         String fullContent = "";
 
-        //Validaciones
+        // Validations and input reading
         do {
-            log.info("Ingrese el id del alumno: FORMATO numérico>0 (escriba EXIT para salir): ");
+            log.info("Enter student's id: FORMAT numeric>0 (enter EXIT to exit): ");
             String input = scanner.next();
 
             if (input.equals("EXIT")) {
@@ -42,21 +41,21 @@ public class InsertStudentData {
                 id = Integer.parseInt(input);
                 if (id > 0) {
                     if (dataRW.idExists(file, id)) {
-                        log.warn("El id ya existe. Introduzca uno diferente.");
+                        log.warn("Id already exists. Please enter something differently.");
                     } else {
                         fullContent += id + ";";
                         break;
                     }
                 } else {
-                    log.warn("El id debe de ser mayor que cero.");
+                    log.warn("Id must be greater than 0.");
                 }
             } else {
-                log.warn("Entrada inválida. Debe ser un número o 'EXIT'. Inténtelo de nuevo.");
+                log.warn("Invalid file. Must be a number or 'EXIT'. Please, try it again.");
             }
         } while (true);
 
         do {
-            log.info("Ingrese el nombre del alumno: (20 caracteres máximo) (escriba EXIT para salir): ");
+            log.info("Enter Student's name: (20 characters max.) (Enter EXIT to exit): ");
             String input = scanner.next();
 
             if (input.equals("EXIT")) {
@@ -68,38 +67,38 @@ public class InsertStudentData {
                 fullContent += name + ";";
                 break;
             } else {
-                log.warn("El nombre debe tener 20 caracteres máximo y no estar vacío.");
+                log.warn("Name must be max. 20 characters and cannot be empty.");
             }
         } while (true);
 
         do {
-            log.info("Ingrese la nota del alumno: FORMATO 0-10 (escriba EXIT para salir): ");
+            log.info("Student's grade: FORMAT 0-10 (Enter EXIT to exit): ");
             String input = scanner.next();
 
             if (input.equals("EXIT")) {
                 break;
             }
 
-            if (InputValidator.isDouble(input)) {
+            if (InputValidator.isFloat(input)) {
                 grade = Float.parseFloat(input);
                 if (InputValidator.isValidGrade(grade)) {
                     fullContent += grade + ";";
                     break;
                 } else {
-                    log.warn("La nota debe estar entre 0 y 10.");
+                    log.warn("Grade must be between 0 and 10.");
                 }
             } else {
-                log.warn("Entrada inválida. Debe ser un número o 'EXIT'. Inténtelo de nuevo.");
+                log.warn("Invalid input. Should be a number or 'EXIT'. Try it again.");
             }
         } while (true);
 
 
-        log.info("\nTexto:\n{}", fullContent);
+        log.info("\nText:\n{}", fullContent);
 
-        // Escritura de alumno en el archivo
-        Alumno alumno = new Alumno(id, name, grade);
-        log.info("Alumno creado: ID={}, Nombre={}, Nota={}", alumno.getId(), alumno.getNombre(), alumno.getNota());
-        dataRW.writeFileObject(file, alumno);
+        // Writing the student to the file
+        Student student = new Student(id, name, grade);
+        log.info("Student created: ID={}, Name={}, Grade={}", student.getId(), student.getName(), student.getGrade());
+        dataRW.writeFileObject(file, student);
 
     }
 

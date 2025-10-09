@@ -4,11 +4,11 @@ import com.jramcon398.jrc.dataReaderWriter.DataRW;
 
 import java.io.File;
 
-/// Clase GetAllStudentsData: Clase para obtener todos los registros de alumnos
-///                           Las clases contenidas en dataManipulation se encargan de las operaciones
-///                           de inserción, consulta y modificación de los registros de alumnos.
-///                           (Utilizan la clase DataRW para las operaciones de lectura y escritura
-///                           en el archivo binario.)
+/// Class GetAllStudentsData: Class to obtain all student records
+///                           The classes contained in dataManipulation are responsible for operations
+///                           insertion, consultation and modification of student records.
+///                           (They use the DataRW class for read and write operations
+///                           in the binary file.)
 
 
 public class GetAllStudentsData {
