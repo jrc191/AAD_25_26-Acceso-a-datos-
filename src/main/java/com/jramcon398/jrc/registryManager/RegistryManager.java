@@ -18,11 +18,19 @@ import java.util.Scanner;
 ///                        operations.
 
 
-@SpringBootApplication
 @Slf4j
 public class RegistryManager {
 
+    private GetAllStudentsData getAllStudentsData;
+    private InsertStudentData insertStudentData;
+    private ModifyStudentData modifyStudentData;
+    private GetStudentDataByPosition getStudentDataByPosition;
+
     public RegistryManager() {
+        this.getAllStudentsData = new GetAllStudentsData();
+        this.insertStudentData = new InsertStudentData();
+        this.modifyStudentData = new ModifyStudentData();
+        this.getStudentDataByPosition = new GetStudentDataByPosition();
 
     }
 
@@ -54,26 +62,20 @@ public class RegistryManager {
                 switch (op) {
                     case 1:
                         log.info("Option 1: Read student's registry file");
-                        GetAllStudentsData studentsData = new GetAllStudentsData();
-                        studentsData.getAllStudentData(file);
+                        getAllStudentsData.getAllStudentData(file);
                         break;
                     case 2:
                         log.info("Option 2: Insert new student");
-                        InsertStudentData insertStudentData = new InsertStudentData();
                         insertStudentData.insertStudentData(file);
                         break;
                     case 3:
                         log.info("Option 3: Modify student's grade");
-                        studentsData = new GetAllStudentsData();
-                        studentsData.getAllStudentData(file);
-                        ModifyStudentData modifyStudentData = new ModifyStudentData();
+                        getAllStudentsData.getAllStudentData(file);
                         modifyStudentData.modifyStudentGrade(file);
                         break;
                     case 4:
                         log.info("Option 4: Get student by position");
-                        GetStudentDataByPosition studentDataByPosition = new GetStudentDataByPosition();
-                        studentDataByPosition.getStudentInfoByPosition(file);
-
+                        getStudentDataByPosition.getStudentInfoByPosition(file);
                         break;
                     case 5:
                         log.info("Exiting...");

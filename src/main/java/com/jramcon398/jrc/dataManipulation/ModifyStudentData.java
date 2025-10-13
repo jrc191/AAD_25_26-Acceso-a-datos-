@@ -1,5 +1,7 @@
 package com.jramcon398.jrc.dataManipulation;
 
+import com.jramcon398.jrc.models.Student;
+import com.jramcon398.jrc.utils.FileConstants;
 import com.jramcon398.jrc.utils.InputValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,11 +25,8 @@ import java.util.Scanner;
 
 public class ModifyStudentData {
 
-    private static final int NAME_LENGTH = 20;
-    private static final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4; // 4 bytes id + 20 characters * 2 bytes/character + 4 bytes float (nota) = 48
-
     public ModifyStudentData() {
-
+        // Constructor
     }
 
     public void modifyStudentGrade(File file) {
@@ -41,12 +40,12 @@ public class ModifyStudentData {
 
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
             // Getting to the position of the student. Each record takes 48 bytes.
-            raf.seek(pos * RECORD_SIZE);
+            raf.seek(pos * FileConstants.RECORD_SIZE);
 
             // Mantain id and name, only modify grade
             int id = raf.readInt();
-            char[] nameChars = new char[NAME_LENGTH];
-            for (int i = 0; i < NAME_LENGTH; i++) {
+            char[] nameChars = new char[FileConstants.NAME_LENGTH];
+            for (int i = 0; i < FileConstants.NAME_LENGTH; i++) {
                 nameChars[i] = raf.readChar();
             }
 
@@ -71,10 +70,13 @@ public class ModifyStudentData {
                 }
             } while (true);
 
+            Student student = new Student(id, name, grade);
+
             // Now we write the new grade
             raf.writeFloat(grade);
             log.warn("------------------------------------------------------------------------------");
-            log.info("Student read: [{}]: ID: {}, Nombre: {}, Nota: {}", pos, id, name, grade);
+            log.info("Student record modified successfully: {}", student);
+            log.info("Student read: [{}]: ID: {}, Name: {}, Grade: {}", pos, id, name, grade);
             log.info("Student's grade at position {} properly modified {}.", pos, grade);
             log.warn("------------------------------------------------------------------------------");
 

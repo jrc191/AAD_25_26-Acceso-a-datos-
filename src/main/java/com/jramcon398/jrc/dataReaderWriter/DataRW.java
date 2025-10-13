@@ -1,9 +1,12 @@
 package com.jramcon398.jrc.dataReaderWriter;
 
 import com.jramcon398.jrc.models.Student;
+import com.jramcon398.jrc.utils.FileConstants;
+import com.jramcon398.jrc.utils.FileUtils;
 import com.jramcon398.jrc.utils.InputValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.jramcon398.jrc.utils.FileConstants;
 
 import java.io.*;
 
@@ -15,14 +18,12 @@ import java.io.*;
 @Slf4j
 public class DataRW {
 
-    private final int NAME_LENGTH = 20;
 
     public DataRW() {
-
+        //Constructor
     }
 
-    public void readFileObject(File file) {
-        final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4; // 48 bytes
+    public void readFile(File file) {
 
         //Checking if the file exists and is not empty
         if (checkFile(file)) {
@@ -35,13 +36,13 @@ public class DataRW {
 
                 for (int pos = 0; pos < totalRecords; pos++) {
                     // We go to the position of the record. Each record is 48 bytes long
-                    raf.seek(pos * RECORD_SIZE);
+                    raf.seek(pos * FileConstants.RECORD_SIZE);
 
                     int id = raf.readInt();
-                    char[] nameChars = new char[NAME_LENGTH];
+                    char[] nameChars = new char[FileConstants.NAME_LENGTH];
 
                     //Read the name character by character
-                    for (int i = 0; i < NAME_LENGTH; i++) {
+                    for (int i = 0; i < FileConstants.NAME_LENGTH; i++) {
                         nameChars[i] = raf.readChar();
                     }
                     String name = new String(nameChars).trim();
@@ -61,7 +62,7 @@ public class DataRW {
         }
     }
 
-    public void writeFileObject(File file, Student student) {
+    public void writeFile(File file, Student student) {
         // Validations
         if (!InputValidator.isNonEmptyString(student.getName())) {
             log.error("Name cannot be empty.");
@@ -76,7 +77,7 @@ public class DataRW {
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
             raf.seek(raf.length());
             raf.writeInt(student.getId());
-            String name = String.format("%-" + NAME_LENGTH + "s", student.getName());
+            String name = String.format("%-" + FileConstants.NAME_LENGTH + "s", student.getName());
             // Write the name character by character
             for (char c : name.toCharArray()) {
                 raf.writeChar(c);
@@ -94,7 +95,7 @@ public class DataRW {
     }
 
     public boolean idExists(File file, int id) {
-        final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4;
+        final int RECORD_SIZE = 4 + FileConstants.NAME_LENGTH * 2 + 4;
         // Checking file existence and non-emptiness
         if (!file.exists() || file.length() == 0) {
             return false;
@@ -118,7 +119,7 @@ public class DataRW {
 
     // Method to get the number of records in the file
     public long getRecordCount(File file) {
-        final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4;
+        final int RECORD_SIZE = 4 + FileConstants.NAME_LENGTH * 2 + 4;
         if (!file.exists() || file.length() == 0){
             return 0;
         }

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Scanner;
+import com.jramcon398.jrc.utils.FileConstants;
 
 
 /// Class GetStudentDataByPosition: Class to check student's info in a certain position
@@ -17,9 +18,6 @@ import java.util.Scanner;
 @SpringBootApplication
 @Slf4j
 public class GetStudentDataByPosition {
-
-    private static final int NAME_LENGTH = 20;
-    private static final int RECORD_SIZE = 4 + NAME_LENGTH * 2 + 4; // 4 bytes id + 20 characters * 2 bytes/character + 4 bytes float (nota) = 48
 
     public GetStudentDataByPosition() {
 
@@ -34,7 +32,7 @@ public class GetStudentDataByPosition {
             return -1;
         }
 
-        long totalRecords = file.length() / RECORD_SIZE;
+        long totalRecords = file.length() / FileConstants.RECORD_SIZE;
 
         log.info("Total file records: {} ", totalRecords);
         log.info("Remember: Position must be between 0 and {}", (totalRecords - 1));
@@ -64,13 +62,13 @@ public class GetStudentDataByPosition {
             log.info("STUDENT INFO AT POSITION: {}", pos);
 
             // Go to the position of the student. Each record takes 48 bytes.
-            raf.seek(pos * RECORD_SIZE);
+            raf.seek(pos * FileConstants.RECORD_SIZE);
 
             // Reading record data
             int id = raf.readInt();
 
-            char[] nameChars = new char[NAME_LENGTH];
-            for (int i = 0; i < NAME_LENGTH; i++) {
+            char[] nameChars = new char[FileConstants.NAME_LENGTH];
+            for (int i = 0; i < FileConstants.NAME_LENGTH; i++) {
                 nameChars[i] = raf.readChar();
             }
             String name = new String(nameChars).trim();

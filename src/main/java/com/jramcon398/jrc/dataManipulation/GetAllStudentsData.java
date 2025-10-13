@@ -4,7 +4,7 @@ import com.jramcon398.jrc.dataReaderWriter.DataRW;
 
 import java.io.File;
 
-/// Class GetAllStudentsData: Class to obtain all student records
+/// Class GetAllStudentsData: Class to obtain all students records
 ///                           The classes contained in dataManipulation are responsible for operations
 ///                           insertion, consultation and modification of student records.
 ///                           (They use the DataRW class for read and write operations
@@ -15,10 +15,10 @@ public class GetAllStudentsData {
 
     DataRW dataRW = new DataRW();
     public GetAllStudentsData() {
-
+        // Constructor
     }
 
     public void getAllStudentData(File file) {
-        dataRW.readFileObject(file);
+        dataRW.readFile(file);
     }
 }
