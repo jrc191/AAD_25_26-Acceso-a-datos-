@@ -18,16 +18,16 @@ public class CsvToXml {
     private final File fileXml;
     private final XmlWriter xmlWriter;
 
-    public CsvToXml(File file, XmlWriter xmlWriter) {
-        this.fileXml = file;
+    public CsvToXml(File fileXml, XmlWriter xmlWriter) {
+        this.fileXml = fileXml;
         this.xmlWriter = xmlWriter;
     }
 
     //We get the data from csv file, we parse it, and we create Student objects
     //Writing operation is delegated to XmlWriter class
-    public boolean csvToXml(File file) {
+    public boolean csvToXml(File fileCSV) {
 
-        CsvParser csvParser = new CsvParser(new CsvReader(file));
+        CsvParser csvParser = new CsvParser(new CsvReader(fileCSV));
         List<Student> students = csvParser.parseStudents();
         return xmlWriter.writeXml(fileXml, students);
     }

@@ -18,7 +18,6 @@ public class CsvReader {
 
     File file;
     Path filePath = FileConstants.getFile().toPath();
-    FileUtils fileUtils = new FileUtils();
 
     public CsvReader(File file) {
         this.file = file;
@@ -27,36 +26,34 @@ public class CsvReader {
 
     public String readCsv() {
 
-        if (!fileUtils.existsAndIsFile(file)) {
+        if (!FileUtils.existsAndIsFile(file)) {
             log.warn("CSV File does not exist: {}", filePath.toString());
             return "File not found.";
 
         }
-        if (!fileUtils.validateFileNotEmpty(file)) {
+        if (!FileUtils.validateFileNotEmpty(file)) {
             log.warn("File is empty: {}", file.getPath());
             return "Empty File.";
         }
 
 
-        try {
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 
-            String linea;
-            String contenido = "";
-            int aux = 0;
+            String line;
+            String content = "";
+            boolean firstLine = true;
 
-            //We skip the first line (header)
-            while ((linea = br.readLine()) != null) {
-                if (aux == 0) {
-                    aux++;
+            //We skip the first line (header).
+            while ((line = br.readLine()) != null) {
+                if (firstLine) {
+                    firstLine = false;
                 } else {
-                    contenido += linea + "\n";
+                    content += line + "\n";
                 }
 
             }
-            br.close();
-            return contenido;
+            return content;
         } catch (IOException e) {
             log.warn("Error during CSV reading {}", e.getMessage());
             return "Reading error.";

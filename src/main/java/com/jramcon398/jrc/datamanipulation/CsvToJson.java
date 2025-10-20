@@ -27,8 +27,8 @@ public class CsvToJson {
 
     //We get the data from csv file, we parse it, and we create Student objects
     //Writing operation is delegated to JsonWriter class
-    public boolean csvToJson(File file) {
-        CsvParser csvParser = new CsvParser(new CsvReader(file));
+    public boolean csvToJson(File fileCSV) {
+        CsvParser csvParser = new CsvParser(new CsvReader(fileCSV));
         List<Student> students = csvParser.parseStudents();
         return jsonWriter.writeJson(fileJson, students);
 

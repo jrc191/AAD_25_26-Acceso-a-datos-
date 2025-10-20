@@ -19,15 +19,14 @@ import java.util.Scanner;
 @Slf4j
 public class Menu {
 
-    File file = FileConstants.getFile();
+    File fileCsv = FileConstants.getFile();
     File fileJson = FileConstants.getFileJson();
     File fileXml = FileConstants.getFileXml();
 
     public Menu() {
-        FileUtils.ensureFileExists(file);
-        FileUtils.ensureFileExists(fileJson);
-        FileUtils.ensureFileExists(fileXml);
-
+        FileUtils.ensureCsvExists(fileCsv);
+        FileUtils.ensureEmptyFileExists(fileJson);
+        FileUtils.ensureEmptyFileExists(fileXml);
     }
 
     public String getMenuOptions() {
@@ -48,7 +47,7 @@ public class Menu {
 
     public void executeMenu() {
 
-        CsvReader csvReader = new CsvReader(file);
+        CsvReader csvReader = new CsvReader(fileCsv);
         JsonWriter jsonWriter = new JsonWriter();
         CsvToJson csvToJson = new CsvToJson(fileJson, jsonWriter);
         CsvToXml csvToXml = new CsvToXml(FileConstants.getFileXml(), new XmlWriter());
@@ -86,13 +85,17 @@ public class Menu {
 
     }
 
-
     private void readCsv(CsvReader reader) {
         log.info("CSV Content:\n{}", reader.readCsv());
     }
-    
+
     private void convertCsvToJson(CsvToJson converter) {
-        if (converter.csvToJson(file)) {
+
+        if (!FileUtils.csvValidations(fileCsv)) {
+            return;
+        }
+
+        if (converter.csvToJson(fileCsv)) {
             log.info("CSV converted to JSON at {}", fileJson.getAbsolutePath());
         } else {
             log.error("Error converting CSV to JSON");
@@ -100,7 +103,12 @@ public class Menu {
     }
 
     private void convertCsvToXml(CsvToXml converter) {
-        if (converter.csvToXml(file)) {
+
+        if (!FileUtils.csvValidations(fileCsv)) {
+            return;
+        }
+
+        if (converter.csvToXml(fileCsv)) {
             log.info("CSV converted to XML at {}", fileXml.getAbsolutePath());
         } else {
             log.error("Error converting CSV to XML");

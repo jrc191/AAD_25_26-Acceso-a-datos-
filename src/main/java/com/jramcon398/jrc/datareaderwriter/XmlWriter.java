@@ -30,6 +30,7 @@ public class XmlWriter {
     }
 
     public boolean writeXml(File file, List<Student> data) {
+        // If the file exists, delete it to avoid appending to existing data
         try {
             if (file.exists()) {
                 boolean delete = file.delete();
