@@ -89,7 +89,7 @@ public class CsvReader {
 
             // Check for duplicated IDs
             if (FileUtils.isIdDuplicated(studentIds, id)) {
-                log.warn("Duplicated ID found: ID {} already exists. Skipping Record: {}", id, line);
+                log.error("Duplicated ID found: ID {} already exists. Skipping Record: {}", id, line);
                 continue;
             }
 
@@ -101,16 +101,12 @@ public class CsvReader {
             // Check grade range
             if (!InputValidator.isValidGrade(gradeStr, id)) {
                 log.warn("Expected grade to be in range 0-10. Result on line -> {}", line);
-                hasInvalidGrades = true;
             }
 
             studentIds.add(id);
             content += line + "\n";
         }
 
-        if (hasInvalidGrades) {
-            log.warn("CSV reading completed with invalid grade warnings.");
-        }
 
         return content;
     }
