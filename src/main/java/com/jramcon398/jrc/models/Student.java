@@ -7,9 +7,7 @@ import java.io.Serializable;
 
 /**
  * Class Student: data model to represent a student record.
- *
- * @author Jose Ramos Contioso
- * @version 1.0
+ * Includes id, name, and grade attributes.
  */
 
 public class Student implements Serializable {
@@ -29,5 +27,12 @@ public class Student implements Serializable {
         this.grade = grade;
     }
 
-
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", grade=" + grade +
+                '}';
+    }
 }

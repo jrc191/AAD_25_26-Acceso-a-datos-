@@ -12,18 +12,26 @@ import java.nio.file.Path;
 /**
  * Class FileUtils: Utility class for file operations.
  * Ensures that a specified file exists, creating it if necessary.
+ * Also provides methods to validate file existence and non-emptiness.
  */
 
 @Slf4j
 public class FileUtils {
 
-    private static String filePath = FileConstants.filePath;
+    private static final String filePath = FileConstants.getFilePath();
 
     public static void ensureFileExists(File file) {
         try {
             if (!file.exists()) {
-                file.createNewFile();
+                boolean success = file.createNewFile();
 
+                if (!success) {
+                    log.warn("Could not create the file: {}", file.getPath());
+                    return;
+                }
+
+                log.info("File created: {}", file.getPath());
+                //Demo data
                 Student student1 = new Student(1, "Ana", 8.5f);
                 Student student2 = new Student(2, "Juan", 6.7f);
                 Student student3 = new Student(3, "Luis", 9.0f);
@@ -41,4 +49,9 @@ public class FileUtils {
     public boolean validateFileNotEmpty(File file) {
         return file.length() > 0;
     }
+
+    public boolean existsAndIsFile(File file) {
+        return file != null && file.exists() && file.isFile();
+    }
+
 }

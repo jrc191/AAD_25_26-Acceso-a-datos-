@@ -1,15 +1,18 @@
 package com.jramcon398.jrc.main;
 
-import com.jramcon398.jrc.datamanipulation.CsvToJson;
-import com.jramcon398.jrc.datareaderwriter.CsvReader;
-import com.jramcon398.jrc.utils.FileUtils;
+import com.jramcon398.jrc.utils.Menu;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.File;
+
+/**
+ * Main class for the Converter application.
+ */
 
 @SpringBootApplication
+@Slf4j
 public class JrcApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
@@ -18,13 +21,10 @@ public class JrcApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        File file = new File("alumnos.csv");
-        FileUtils.ensureFileExists(file);
-        CsvReader csvReader = new CsvReader(file);
-        csvReader.readCsv();
-        CsvToJson convertJson = new CsvToJson(new File("students.json"));
-        convertJson.writeJsonFile(file);
-        //jsonWriter.writeJsonFile(file);
+        log.info("Application started.");
+        Menu menu = new Menu();
+        menu.executeMenu();
 
+        log.info("Application finished.");
     }
 }
