@@ -15,20 +15,16 @@ import java.util.Set;
  * Class FileUtils: Utility class for file operations.
  * Ensures that a specified file exists, creating it if necessary.
  * Also provides methods to validate file existence and non-emptiness.
+ * Includes functionality to check for duplicate student IDs.
+ * Handles default CSV header and demo student data population.
  */
 
 @Slf4j
 public class FileUtils {
-
-    private static final String filePath = FileConstants.getFilePath();
+    
     // Default CSV header and demo student data
-    private static final String DEFAULT_CSV_HEADER = "id,nombre,nota\n";
-    private static final List<Student> DEFAULT_STUDENTS = List.of(
-            new Student(1, "Ana", 8.5f),
-            new Student(2, "Juan", 6.7f),
-            new Student(3, "Luis", 9.0f)
-    );
-
+    private static final String DEFAULT_CSV_HEADER = FileConstants.getDEFAULT_CSV_HEADER();
+    private static final List<Student> DEFAULT_STUDENTS = FileConstants.getDEFAULT_STUDENTS();
 
     public static boolean isIdDuplicated(Set<String> studentIds, String id) {
         return studentIds.contains(id);

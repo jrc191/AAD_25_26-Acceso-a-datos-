@@ -9,6 +9,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * JsonWriter Class: Class responsible for writing a list of Student objects to a JSON file.
+ * Utilizes Jackson's ObjectMapper for JSON serialization.
+ * Handles file existence by deleting existing files before writing new data.
+ */
+
 @Slf4j
 public class JsonWriter {
 

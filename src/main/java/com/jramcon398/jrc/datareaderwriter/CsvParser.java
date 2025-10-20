@@ -14,6 +14,8 @@ import java.util.Set;
 /**
  * CsvParser Class: Responsible for parsing CSV data and creating Student objects.
  * Refactored to delegate CSV reading to CsvReader class, used in both CsvToJson and CsvToXml classes.
+ * Validation of input data is handled by InputValidator class.
+ * Validation for duplicate IDs is handled by FileUtils class.
  */
 
 @Slf4j
@@ -25,7 +27,13 @@ public class CsvParser {
         this.csvReader = csvReader;
     }
 
-    //We parse the CSV data and create Student objects. CSV reading is delegated to CsvReader class.
+    /**
+     * parseStudents Method:
+     * Parses CSV data to create a list of Student objects.
+     * Validates each line for correct format, duplicate IDs, and grade ranges.
+     *
+     * @return List<Student> (list of valid Student objects)
+     */
     public List<Student> parseStudents() {
         List<Student> students = new ArrayList<>();
         Set<String> usedIds = new HashSet<>();
@@ -77,7 +85,7 @@ public class CsvParser {
                     log.warn("Expected grade to be in range 0-10. Result on line -> {}", line);
                     continue;
                 }
-                
+
                 students.add(new Student(id, name, grade));
                 usedIds.add(idStr); // Track used IDs to prevent duplicates
             } catch (NumberFormatException e) {

@@ -14,7 +14,7 @@ import java.util.List;
  * XmlWriter Class: Class responsible for writing a list of Student objects to an XML file.
  * Utilizes Jackson's XmlMapper for XML serialization.
  * Uses Students wrapper class to encapsulate the list of Student objects.
- * WRAP_ROOT_VALUE is set to false to avoid additional root element.
+ * WRAP_ROOT_VALUE is set to false, avoiding additional root element.
  * Enables INDENT_OUTPUT for pretty-printing the XML output.
  */
 

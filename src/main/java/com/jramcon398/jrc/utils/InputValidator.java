@@ -4,11 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * InputValidator Class: Utility class for validating user inputs.
+ * Includes methods for parsing integers within a range,
+ * validating CSV format, and checking grade's correct format.
  */
 
 @Slf4j
 public class InputValidator {
 
+    private InputValidator() {
+    }
 
     public static int parseIntInRange(String input, int min, int max) throws IllegalArgumentException {
         int value;
