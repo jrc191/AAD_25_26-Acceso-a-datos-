@@ -5,14 +5,22 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
-/// Class Student: data model to represent a student record.
+/**
+ * Class Student: data model to represent a student record.
+ *
+ * @author Jose Ramos Contioso
+ * @version 1.0
+ */
 
 public class Student implements Serializable {
-    @Getter @Setter
+    @Getter
+    @Setter
     int id;
-    @Getter @Setter
+    @Getter
+    @Setter
     String name;
-    @Getter @Setter
+    @Getter
+    @Setter
     float grade;
 
     public Student(int id, String name, float grade) {
