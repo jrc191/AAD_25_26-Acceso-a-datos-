@@ -1,6 +1,8 @@
 package com.jramcon398.jrc.datareaderwriter;
 
 import com.jramcon398.jrc.models.Student;
+import com.jramcon398.jrc.utils.FileUtils;
+import com.jramcon398.jrc.utils.InputValidator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ public class CsvParser {
     //We parse the CSV data and create Student objects. CSV reading is delegated to CsvReader class.
     public List<Student> parseStudents() {
         List<Student> students = new ArrayList<>();
-        Set<Integer> usedIds = new HashSet<>();
+        Set<String> usedIds = new HashSet<>();
         String studentData = csvReader.readCsv();
 
         // Check for error messages from CsvReader. Errors are defined on CsvReader class.
@@ -46,31 +48,38 @@ public class CsvParser {
             // Split line by commas, each column represents a field
             String[] data = line.split(",");
 
-            // Validate that there are exactly 3 columns (id, name, grade)
-            if (data.length < 3) {
+            // Validate format length. Max 3 columns expected.
+            if (InputValidator.isValidCsvFormat(data, line)) {
                 log.warn("Invalid CSV format at line {}: '{}'. Expected 3 columns, found {}", position + 1, line, data.length);
                 continue;
             }
 
             try {
-                int id = Integer.parseInt(data[0].trim());
+                String idStr = data[0].trim();
+                int id = Integer.parseInt(idStr);
                 String name = data[1].trim();
-                float grade = Float.parseFloat(data[2].trim());
+                String gradeStr = data[2].trim();
 
-                if (usedIds.contains(id)) {
+                if (FileUtils.isIdDuplicated(usedIds, idStr)) {
                     log.warn("Duplicate ID found at line {}: ID {} already exists. Skipping student: {}",
                             position + 1, id, name);
                     continue;
                 }
 
-                if (grade < 0 || grade > 10) {
-                    log.warn("Invalid grade at line {}: Grade {} is out of range (0-10). Skipping student: {}",
-                            position + 1, grade, name);
+                Double gradeDouble = InputValidator.parseGrade(gradeStr, idStr);
+                if (gradeDouble == null) {
                     continue;
                 }
 
+                float grade = gradeDouble.floatValue();
+
+                if (!InputValidator.isGradeInRange(grade, idStr)) {
+                    log.warn("Expected grade to be in range 0-10. Result on line -> {}", line);
+                    continue;
+                }
+                
                 students.add(new Student(id, name, grade));
-                usedIds.add(id); // Track used IDs to prevent duplicates
+                usedIds.add(idStr); // Track used IDs to prevent duplicates
             } catch (NumberFormatException e) {
                 log.warn("Invalid number format at line {}: '{}'", position + 1, line);
             }

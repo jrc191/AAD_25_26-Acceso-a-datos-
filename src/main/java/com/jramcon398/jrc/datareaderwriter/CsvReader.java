@@ -2,6 +2,7 @@ package com.jramcon398.jrc.datareaderwriter;
 
 import com.jramcon398.jrc.utils.FileConstants;
 import com.jramcon398.jrc.utils.FileUtils;
+import com.jramcon398.jrc.utils.InputValidator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -25,42 +26,6 @@ public class CsvReader {
         this.file = file;
     }
 
-    private static boolean validFormatLength(String[] fields, String line) {
-        if (fields.length < 3) {
-            log.warn("Invalid CSV format: '{}'. Expected at least 3 columns.", line);
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isIdDuplicated(Set<String> studentIds, String id) {
-        return studentIds.contains(id);
-    }
-
-    private Double parseGrade(String gradeStr, String id) {
-        try {
-            return Double.parseDouble(gradeStr);
-        } catch (NumberFormatException e) {
-            log.error("Invalid grade format for student {}: {}. Skipping record.", id, gradeStr);
-            return null;
-        }
-    }
-
-    private boolean isGradeInRange(double grade, String id) {
-        if (grade < 0 || grade > 10) {
-            log.warn("Invalid grade found for student (FORMAT 0-10) {}: {}. Keeping record.", id, grade);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isValidGrade(String gradeStr, String id) {
-        Double grade = parseGrade(gradeStr, id);
-        if (grade == null) {
-            return false;
-        }
-        return isGradeInRange(grade, id);
-    }
 
     public String readCsv() {
 
@@ -92,26 +57,27 @@ public class CsvReader {
                 String[] fields = line.split(",");
 
                 // Validate format length. Max 3 columns expected.
-                if (validFormatLength(fields, line)) {
+                if (InputValidator.isValidCsvFormat(fields, line)) {
                     continue;
                 }
 
                 String id = fields[0].trim();
                 String gradeStr = fields[2].trim();
 
-
-                if (isIdDuplicated(studentIds, id)) {
+                // Check for duplicated IDs
+                if (FileUtils.isIdDuplicated(studentIds, id)) {
                     log.warn("Duplicated ID found: ID {} already exists. Skipping Record: {}",
                             id, line);
                     continue;
                 }
 
-                if (parseGrade(gradeStr, id) == null) {
+                // Validate grade format
+                if (InputValidator.parseGrade(gradeStr, id) == null) {
                     continue;
                 }
 
-                //Grade is not a factor for skipping the line, just a warning is logged.
-                if (!isValidGrade(gradeStr, id)) {
+                //Grade, if valid format, is not a factor for skipping the line (only on reading), just a warning is logged (because out of range).
+                if (!InputValidator.isValidGrade(gradeStr, id)) {
                     log.warn("Expected grade to be in range 0-10. Result on line -> {}", line);
                     hasInvalidGrades = true;
                 }

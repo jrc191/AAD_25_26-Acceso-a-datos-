@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class FileUtils: Utility class for file operations.
@@ -27,6 +28,12 @@ public class FileUtils {
             new Student(2, "Juan", 6.7f),
             new Student(3, "Luis", 9.0f)
     );
+
+
+    public static boolean isIdDuplicated(Set<String> studentIds, String id) {
+        return studentIds.contains(id);
+    }
+
 
     public static void ensureCsvExists(File file) {
         try {

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InputValidator {
 
+
     public static int parseIntInRange(String input, int min, int max) throws IllegalArgumentException {
         int value;
         try {
@@ -25,5 +26,38 @@ public class InputValidator {
 
         return value;
     }
-    
+
+    public static boolean isValidCsvFormat(String[] fields, String line) {
+        if (fields.length < 3) {
+            log.warn("Invalid CSV format: '{}'. Expected at least 3 columns.", line);
+            return true;
+        }
+        return false;
+    }
+
+    public static Double parseGrade(String gradeStr, String id) {
+        try {
+            return Double.parseDouble(gradeStr);
+        } catch (NumberFormatException e) {
+            log.error("Invalid grade format for student {}: {}. Skipping record.", id, gradeStr);
+            return null;
+        }
+    }
+
+    public static boolean isGradeInRange(double grade, String id) {
+        if (grade < 0 || grade > 10) {
+            log.warn("Invalid grade found for student (FORMAT 0-10) {}: {}. Keeping record.", id, grade);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isValidGrade(String gradeStr, String id) {
+        Double grade = parseGrade(gradeStr, id);
+        if (grade == null) {
+            return false;
+        }
+        return isGradeInRange(grade, id);
+    }
+
 }
