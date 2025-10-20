@@ -1,5 +1,6 @@
 package com.jramcon398.jrc.main;
 
+import com.jramcon398.jrc.datamanipulation.CsvToJson;
 import com.jramcon398.jrc.datareaderwriter.CsvReader;
 import com.jramcon398.jrc.utils.FileUtils;
 import org.springframework.boot.CommandLineRunner;
@@ -21,6 +22,9 @@ public class JrcApplication implements CommandLineRunner {
         FileUtils.ensureFileExists(file);
         CsvReader csvReader = new CsvReader(file);
         csvReader.readCsv();
+        CsvToJson convertJson = new CsvToJson(new File("students.json"));
+        convertJson.writeJsonFile(file);
+        //jsonWriter.writeJsonFile(file);
 
     }
 }

@@ -37,4 +37,8 @@ public class FileUtils {
             log.warn("Error reading file: {}", e.getMessage());
         }
     }
+
+    public boolean validateFileNotEmpty(File file) {
+        return file.length() > 0;
+    }
 }
