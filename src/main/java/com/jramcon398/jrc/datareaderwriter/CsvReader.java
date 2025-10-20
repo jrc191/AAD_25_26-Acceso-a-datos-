@@ -33,24 +33,33 @@ public class CsvReader {
         return false;
     }
 
-    private static boolean isValidGrade(String gradeStr, String id) {
+    public static boolean isIdDuplicated(Set<String> studentIds, String id) {
+        return studentIds.contains(id);
+    }
+
+    private Double parseGrade(String gradeStr, String id) {
         try {
-            double grade = Double.parseDouble(gradeStr);
-            if (grade < 0 || grade > 10) {
-
-                log.error("Invalid grade found for student (FORMAT 0-10) {}: {}", id, grade);
-                return false;
-            }
+            return Double.parseDouble(gradeStr);
         } catch (NumberFormatException e) {
+            log.error("Invalid grade format for student {}: {}. Skipping record.", id, gradeStr);
+            return null;
+        }
+    }
 
-            log.warn("Invalid grade format for student {}: {}", id, gradeStr);
+    private boolean isGradeInRange(double grade, String id) {
+        if (grade < 0 || grade > 10) {
+            log.warn("Invalid grade found for student (FORMAT 0-10) {}: {}. Keeping record.", id, grade);
             return false;
         }
         return true;
     }
 
-    public static boolean isIdDuplicated(Set<String> studentIds, String id) {
-        return studentIds.contains(id);
+    private boolean isValidGrade(String gradeStr, String id) {
+        Double grade = parseGrade(gradeStr, id);
+        if (grade == null) {
+            return false;
+        }
+        return isGradeInRange(grade, id);
     }
 
     public String readCsv() {
@@ -66,7 +75,6 @@ public class CsvReader {
             String content = "";
             boolean firstLine = true;
             Set<String> studentIds = new HashSet<>();
-            boolean hasDuplicateIds = false;
             boolean hasInvalidGrades = false;
 
             //We skip the first line (header).
@@ -93,8 +101,12 @@ public class CsvReader {
 
 
                 if (isIdDuplicated(studentIds, id)) {
-                    log.warn("Duplicated ID found: ID {} already exists. Skipping line: {}",
+                    log.warn("Duplicated ID found: ID {} already exists. Skipping Record: {}",
                             id, line);
+                    continue;
+                }
+
+                if (parseGrade(gradeStr, id) == null) {
                     continue;
                 }
 
