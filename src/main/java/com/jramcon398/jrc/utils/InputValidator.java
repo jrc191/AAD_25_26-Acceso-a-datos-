@@ -25,8 +25,5 @@ public class InputValidator {
 
         return value;
     }
-
-    public static boolean isNotEmpty(String input) {
-        return input != null && !input.trim().isEmpty();
-    }
+    
 }

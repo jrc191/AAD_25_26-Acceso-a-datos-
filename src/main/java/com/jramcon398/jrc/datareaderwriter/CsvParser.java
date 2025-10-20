@@ -4,7 +4,9 @@ import com.jramcon398.jrc.models.Student;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -24,6 +26,7 @@ public class CsvParser {
     //We parse the CSV data and create Student objects. CSV reading is delegated to CsvReader class.
     public List<Student> parseStudents() {
         List<Student> students = new ArrayList<>();
+        Set<Integer> usedIds = new HashSet<>();
         String studentData = csvReader.readCsv();
 
         // Check for error messages from CsvReader. Errors are defined on CsvReader class.
@@ -48,13 +51,26 @@ public class CsvParser {
                 log.warn("Invalid CSV format at line {}: '{}'. Expected 3 columns, found {}", position + 1, line, data.length);
                 continue;
             }
-            
+
             try {
                 int id = Integer.parseInt(data[0].trim());
                 String name = data[1].trim();
                 float grade = Float.parseFloat(data[2].trim());
 
+                if (usedIds.contains(id)) {
+                    log.warn("Duplicate ID found at line {}: ID {} already exists. Skipping student: {}",
+                            position + 1, id, name);
+                    continue;
+                }
+
+                if (grade < 0 || grade > 10) {
+                    log.warn("Invalid grade at line {}: Grade {} is out of range (0-10). Skipping student: {}",
+                            position + 1, grade, name);
+                    continue;
+                }
+
                 students.add(new Student(id, name, grade));
+                usedIds.add(id); // Track used IDs to prevent duplicates
             } catch (NumberFormatException e) {
                 log.warn("Invalid number format at line {}: '{}'", position + 1, line);
             }
