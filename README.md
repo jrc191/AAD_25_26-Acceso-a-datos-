@@ -12,6 +12,8 @@
 
 # 3. DOCKER-COMPOSE.YML
 
+![](img.png)
+
 ```
     version: '3.8'
     services:
