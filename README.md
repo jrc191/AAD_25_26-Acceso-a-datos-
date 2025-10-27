@@ -34,10 +34,11 @@
 
 - Para probar la conexión, creamos una nueva con un gestor como DBeaver o PgAdmin, utilizando los siguientes datos:
 
-| HOST       | localhost |
+| PARÁMETRO  | VALOR     |
 |------------|-----------|
 | PUERTO     | 5432      |
 | USUARIO    | admin     |
 | CONTRASEÑA | admin     |
 | BBDD       | prueba    |
+| HOST       | localhost |
 
