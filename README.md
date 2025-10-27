@@ -12,6 +12,7 @@
 
 # 3. DOCKER-COMPOSE.YML
 
+```
     version: '3.8'
     services:
       postgres:
@@ -25,14 +26,16 @@
           - "5432:5432"
         volumes:
           - ./data:/var/lib/postgresql/data
+```    
 
 # 4. Cómo has conectado a la base de datos PostgreSQL.
 
     - Para probar la conexión, creamos una nueva con un gestor como DBeaver o PgAdmin, utilizando los siguientes datos:
 
+```
         - Host: localhost
         - Puerto: 5432
         - Usuario: admin
         - Contraseña: admin
         - Base de datos: prueba
-
+```
