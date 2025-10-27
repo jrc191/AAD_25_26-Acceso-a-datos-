@@ -14,7 +14,7 @@
 
 ![](img.png)
 
-```
+``` 
     version: '3.8'
     services:
       postgres:
@@ -32,12 +32,12 @@
 
 # 4. Cómo has conectado a la base de datos PostgreSQL.
 
-    - Para probar la conexión, creamos una nueva con un gestor como DBeaver o PgAdmin, utilizando los siguientes datos:
+- Para probar la conexión, creamos una nueva con un gestor como DBeaver o PgAdmin, utilizando los siguientes datos:
 
-```
-        - Host: localhost
-        - Puerto: 5432
-        - Usuario: admin
-        - Contraseña: admin
-        - Base de datos: prueba
-```
+| HOST       | localhost |
+|------------|-----------|
+| PUERTO     | 5432      |
+| USUARIO    | admin     |
+| CONTRASEÑA | admin     |
+| BBDD       | prueba    |
+
