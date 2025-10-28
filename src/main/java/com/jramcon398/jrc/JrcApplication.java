@@ -57,6 +57,7 @@ public class JrcApplication implements CommandLineRunner {
                 default -> log.warn("Invalid option. Please try again.");
             }
         }
+        log.warn("Exiting application. Goodbye!");
     }
 
 
