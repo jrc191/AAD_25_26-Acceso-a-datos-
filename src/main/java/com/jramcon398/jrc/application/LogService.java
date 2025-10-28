@@ -11,6 +11,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * LogService class providing services related to LogEvent management.
+ * Implements validation and business logic for creating, retrieving, and managing log events.
+ *
+ * @see LogEvent
+ * @see LogRepository
+ */
+
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -68,7 +77,7 @@ public class LogService implements CustomService<LogEvent> {
             log.info("Encoding is already set to: {}", encoding);
             return true;
         }
-        
+
         logRepository.setEncoding(encoding);
         log.info("Encoding changed to: {}", encoding);
         return true;

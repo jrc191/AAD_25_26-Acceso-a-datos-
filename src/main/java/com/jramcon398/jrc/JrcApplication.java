@@ -2,7 +2,6 @@ package com.jramcon398.jrc;
 
 import com.jramcon398.jrc.application.LogService;
 import com.jramcon398.jrc.model.LogEvent;
-import com.jramcon398.jrc.repository.LogRepository;
 import com.jramcon398.jrc.util.InputValidation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,17 +12,26 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Main application class for the JRC logging application.
+ * Implements CommandLineRunner to provide a console-based menu for user interaction.
+ * Handles adding log events, filtering by date, changing encoding, and displaying all logs.
+ * Uses LogService for business logic and LogRepository for data persistence.
+ *
+ * @see LogService
+ * @see InputValidation
+ *
+ */
+
 @SpringBootApplication
 @RequiredArgsConstructor
 @Slf4j
 public class JrcApplication implements CommandLineRunner {
 
     private final LogService logService;
-    private final LogRepository logRepository;
     private final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-
         SpringApplication.run(JrcApplication.class, args);
     }
 
@@ -38,7 +46,6 @@ public class JrcApplication implements CommandLineRunner {
         boolean exit = false;
 
         while (!exit) {
-            showMenu();
             int option = InputValidation.validateMenuOption(scanner, 1, 5, "Please select an option (1-5): ");
 
             switch (option) {
@@ -53,16 +60,9 @@ public class JrcApplication implements CommandLineRunner {
     }
 
 
-    private void showMenu() {
-        // Mostrar opciones
-        log.info("1. Add Event");
-        log.info("2. Filter by Date");
-        log.info("3. Change Encoding");
-        log.info("4. Show All Logs");
-        log.info("5. Exit");
-
-    }
-
+    /**
+     * Add a new log event. Performs input validation before adding.
+     */
     private void addEvent() {
 
         String message = InputValidation.validateNonEmptyInput(scanner, "Log Message", "Enter log message: ");
@@ -81,6 +81,10 @@ public class JrcApplication implements CommandLineRunner {
         }
     }
 
+
+    /**
+     * Filter log events by date. Prompts user for date input and displays matching logs.
+     */
     private void filterByDate() {
         String dateInput = InputValidation.validateDateInput(scanner, "Enter date (YYYY-MM-DD): ");
 
@@ -89,7 +93,7 @@ public class JrcApplication implements CommandLineRunner {
         List<LogEvent> logs = logService.getEventsByDate(dateInput);
 
         if (logs.isEmpty()) {
-            log.info("No logs found for the specified date.");
+            log.warn("No logs found for the specified date.");
         } else {
             for (LogEvent logEvent : logs) {
                 log.info("Log: {}", logEvent);
@@ -97,6 +101,11 @@ public class JrcApplication implements CommandLineRunner {
 
         }
     }
+
+
+    /**
+     * Change the encoding used for log files. Prompts user for confirmation before changing.
+     */
 
     private void changeEncoding() {
         log.info("Current encoding: {}", logService.getCurrentEncoding());
@@ -122,7 +131,7 @@ public class JrcApplication implements CommandLineRunner {
                 }
                 validInput = true;
             } else if (confirmation.equals("n") || confirmation.equals("no")) {
-                log.info("Encoding change cancelled.");
+                log.warn("Encoding change cancelled.");
                 validInput = true;
             } else {
                 log.warn("Invalid input. Please enter 'y' for yes or 'n' for no: ");
@@ -135,7 +144,7 @@ public class JrcApplication implements CommandLineRunner {
         List<LogEvent> allLogs = logService.getAllEvents();
 
         if (allLogs.isEmpty()) {
-            log.info("No logs found.");
+            log.warn("No logs found.");
         } else {
             log.info("Found {} log events:", allLogs.size());
             for (LogEvent logEvent : allLogs) {

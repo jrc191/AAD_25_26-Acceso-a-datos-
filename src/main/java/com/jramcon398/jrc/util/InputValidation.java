@@ -9,11 +9,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+
+/**
+ * InputValidation utility class providing methods for validating user inputs.
+ * Includes methods for menu option validation, non-empty input validation,
+ * date input validation, log message validation, and encoding input validation.
+ */
+
 @Slf4j
 @UtilityClass
 public class InputValidation {
 
+    private void showMenu() {
+        // Mostrar opciones
+        log.info("1. Add Event");
+        log.info("2. Filter by Date");
+        log.info("3. Change Encoding");
+        log.info("4. Show All Logs");
+        log.info("5. Exit");
+
+    }
+
+    //Reusable method to validate menu option input. If needed can be extended to accept different ranges.
     public int validateMenuOption(Scanner scanner, int minOption, int maxOption, String prompt) {
+        showMenu();
         int option = -1;
         do {
             log.info(prompt);

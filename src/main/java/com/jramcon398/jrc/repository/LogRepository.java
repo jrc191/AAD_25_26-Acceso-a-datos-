@@ -13,6 +13,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * LogRepository class implementing CRUD operations for LogEvent entities.
+ * Handles log file reading and writing with configurable encoding.
+ *
+ * @see LogEvent
+ * @see CrudRepository
+ */
+
 @Slf4j
 @Repository
 public class LogRepository implements CrudRepository<LogEvent> {
@@ -20,8 +28,10 @@ public class LogRepository implements CrudRepository<LogEvent> {
     private String encoding = Constant.UTF_8.toString(); // Configurable via application menu
 
     /**
+     * Creates a new log entry in the log file using the current encoding. Verifies and creates the log directory if it doesn't exist.
+     *
      * @param entity
-     * @return
+     * @return LogEvent or null.
      */
     @Override
     public LogEvent create(LogEvent entity) {
@@ -72,7 +82,7 @@ public class LogRepository implements CrudRepository<LogEvent> {
 
     /**
      * @param entity
-     * @return
+     * @return LogEvent or null . ALWAYS null, as reading individual log entries is not supported.
      */
     @Override
     public LogEvent read(LogEvent entity) {
@@ -81,28 +91,36 @@ public class LogRepository implements CrudRepository<LogEvent> {
 
     /**
      * @param entity
-     * @return
+     * @return LogEvent or null . ALWAYS null, as updating log entries is not supported.
      */
     @Override
     public LogEvent update(LogEvent entity) {
+        //Log files are info; updating existing entries is not supported.
         return null;
     }
 
     /**
      * @param entity
-     * @return
+     * @return boolean
      */
     @Override
     public boolean delete(LogEvent entity) {
+        //Log files are info; deleting existing entries is not supported.
         return false;
     }
+
+    /**
+     * Reads all log events from the log file using the current encoding.
+     *
+     * @return List of LogEvent objects read from the log file.
+     */
 
     public List<LogEvent> readAll() {
         List<LogEvent> logEvents = new ArrayList<>();
         File logFile = new File(Constant.LOG_FILE_PATH);
 
         if (!logFile.exists()) {
-            log.warn("Log file does not exist: {}", Constant.LOG_FILE_PATH);
+            log.warn("Log file does not exist: {}, {}", Constant.LOG_FILE_PATH, Constant.LOG_FILE_NOT_FOUND);
             return logEvents;
         }
 
@@ -116,6 +134,7 @@ public class LogRepository implements CrudRepository<LogEvent> {
 
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
+                // Parse each line into a LogEvent. Skip invalid lines with a warning.
                 LogEvent logEvent = parseLogLine(line);
                 if (logEvent != null) {
                     logEvents.add(logEvent);
@@ -137,15 +156,23 @@ public class LogRepository implements CrudRepository<LogEvent> {
         return logEvents;
     }
 
+    /**
+     * Parses a single log line into a LogEvent object.
+     * Expected format: [timestamp] message
+     *
+     * @param line
+     * @return
+     */
     private LogEvent parseLogLine(String line) {
         if (line == null || line.trim().isEmpty()) {
             return null;
         }
 
+        //We look for the first closing bracket to separate timestamp and message
         int closingBracketIndex = line.indexOf(']');
 
-        //Extracting timestamp and message from log line
         if (line.startsWith("[") && closingBracketIndex > 1) {
+            //Extracting timestamp and message
             String timestamp = line.substring(1, closingBracketIndex);
             String message = line.substring(closingBracketIndex + 1).trim();
 
@@ -156,6 +183,13 @@ public class LogRepository implements CrudRepository<LogEvent> {
         return null;
 
     }
+
+    /**
+     * Finds log events by date. Firstly reads all events, then filters by the specified date.
+     *
+     * @param date in format "YYYY-MM-DD"
+     * @return List of LogEvent objects matching the specified date.
+     */
 
     public List<LogEvent> findByDate(String date) {
         List<LogEvent> allEvents = readAll();

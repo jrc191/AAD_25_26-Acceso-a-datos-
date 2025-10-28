@@ -6,6 +6,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Constant utility class containing application-wide constants.
+ */
+
 @UtilityClass
 public class Constant {
     public static final DateTimeFormatter DATE_TIME_FORMAT =
