@@ -202,6 +202,7 @@ public class LogRepository implements CrudRepository<LogEvent> {
         }
 
         log.info("Found {} log events for date: {}", filteredEvents.size(), date);
+        log.warn("LOG EVENTS FOR DATE {}:", date);
         return filteredEvents;
     }
 

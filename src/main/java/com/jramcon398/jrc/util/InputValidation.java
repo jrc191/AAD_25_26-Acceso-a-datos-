@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static com.jramcon398.jrc.util.Menu.showMenu;
+
 
 /**
  * InputValidation utility class providing methods for validating user inputs.
@@ -20,29 +22,23 @@ import java.util.Scanner;
 @UtilityClass
 public class InputValidation {
 
-    private void showMenu() {
-        // Mostrar opciones
-        log.info("1. Add Event");
-        log.info("2. Filter by Date");
-        log.info("3. Change Encoding");
-        log.info("4. Show All Logs");
-        log.info("5. Exit");
-
-    }
-
     //Reusable method to validate menu option input. If needed can be extended to accept different ranges.
     public int validateMenuOption(Scanner scanner, int minOption, int maxOption, String prompt) {
-        showMenu();
+
+        log.info(showMenu());
         int option = -1;
         do {
+
             log.info(prompt);
             while (!scanner.hasNextInt()) {
+                log.info(showMenu());
                 log.warn("Invalid input. Please enter a number between {} and {}.", minOption, maxOption);
                 scanner.next(); // clear invalid input
             }
             option = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+            scanner.nextLine();
             if (option < minOption || option > maxOption) {
+                log.info(showMenu());
                 log.warn("Option out of range. Please enter a number between {} and {}.", minOption, maxOption);
             }
         } while (option < minOption || option > maxOption);

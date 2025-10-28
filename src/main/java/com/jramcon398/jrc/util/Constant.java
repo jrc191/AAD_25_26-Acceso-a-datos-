@@ -22,5 +22,17 @@ public class Constant {
     public static final String INVALID_ENCODING = "Invalid encoding. Supported encodings: UTF-8, ISO-8859-1";
     public static final Charset UTF_8 = StandardCharsets.UTF_8;
     public static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+    public static final String MENU = """
+            \n
+            ╔══════════════════════════╗
+            ║        Menu Options      ║
+            ╠══════════════════════════╣
+            ║    1. Add Event          ║
+            ║    2. Filter by Date     ║
+            ║    3. Change Encoding    ║
+            ║    4. Show All Logs      ║
+            ║    5. Exit               ║
+            ╚══════════════════════════╝
+            """;
 
 }
