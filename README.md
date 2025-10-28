@@ -41,6 +41,15 @@ The application is divided into several key components:
 - **`JrcApplication.java`**  
   The main Spring Boot entry point. Running this file starts the entire application.
 
+- **`application.properties`**  
+  Contains configuration settings for the Spring Boot application.
+
+- **`Menu.java`**
+  Manages user interactions through a console-based menu system.
+
+- **`pom.xml`**  
+  Manages project dependencies and build configurations using Maven.
+
 ---
 
 ## Requirements
