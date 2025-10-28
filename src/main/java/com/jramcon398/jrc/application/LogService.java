@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,13 +39,23 @@ public class LogService implements CustomService<LogEvent> {
     }
 
     public List<LogEvent> getEventsByDate(String date) {
+        if (date == null || date.isEmpty()) {
+            log.warn("Date parameter cannot be null or empty");
+            return new ArrayList<>();
+        }
 
-        return null;
+        try {
+            // Validate date format
+            LocalDate.parse(date, Constant.DATE_FORMAT);
+            return logRepository.findByDate(date);
+        } catch (Exception e) {
+            log.warn("Invalid date format: {}", date);
+            return new ArrayList<>();
+        }
     }
 
     public List<LogEvent> getAllEvents() {
-        // Llamar a logRepository para leer todos
-        return null;
+        return logRepository.readAll();
     }
 
     public boolean changeEncoding(String encoding) {
@@ -56,8 +68,10 @@ public class LogService implements CustomService<LogEvent> {
             log.info("Encoding is already set to: {}", encoding);
             return true;
         }
-
-        return true; //A IMPLEMENTAR EN LogRepository
+        
+        logRepository.setEncoding(encoding);
+        log.info("Encoding changed to: {}", encoding);
+        return true;
     }
 
     public String getCurrentEncoding() {

@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -97,17 +98,77 @@ public class LogRepository implements CrudRepository<LogEvent> {
     }
 
     public List<LogEvent> readAll() {
-        // Leer todas las líneas del fichero
-        // Parsear cada línea: extraer [timestamp] y message
-        // Retornar lista de LogEvent
+        List<LogEvent> logEvents = new ArrayList<>();
+        File logFile = new File(Constant.LOG_FILE_PATH);
+
+        if (!logFile.exists()) {
+            log.warn("Log file does not exist: {}", Constant.LOG_FILE_PATH);
+            return logEvents;
+        }
+
+        // Sequential file reading with InputStreamReader for encoding conversion
+        try (FileInputStream fis = new FileInputStream(logFile);
+             InputStreamReader isr = new InputStreamReader(fis, Charset.forName(encoding));
+             BufferedReader reader = new BufferedReader(isr)) {
+
+            String line;
+            int lineNumber = 0;
+
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                LogEvent logEvent = parseLogLine(line);
+                if (logEvent != null) {
+                    logEvents.add(logEvent);
+                } else if (!line.trim().isEmpty()) {
+                    log.warn("Failed to parse line {}: {}", lineNumber, line);
+                }
+            }
+
+            log.info("Read {} log events with encoding {}", logEvents.size(), encoding);
+
+        } catch (FileNotFoundException e) {
+            log.error("Log file not found: {}", Constant.LOG_FILE_PATH);
+        } catch (IOException e) {
+            log.error("Error reading log file with encoding {}: {}", encoding, e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error reading log file: {}", e.getMessage());
+        }
+
+        return logEvents;
+    }
+
+    private LogEvent parseLogLine(String line) {
+        if (line == null || line.trim().isEmpty()) {
+            return null;
+        }
+
+        int closingBracketIndex = line.indexOf(']');
+
+        //Extracting timestamp and message from log line
+        if (line.startsWith("[") && closingBracketIndex > 1) {
+            String timestamp = line.substring(1, closingBracketIndex);
+            String message = line.substring(closingBracketIndex + 1).trim();
+
+            return new LogEvent(timestamp, message);
+        }
+
+        log.warn("Invalid log line format: {}", line);
         return null;
+
     }
 
     public List<LogEvent> findByDate(String date) {
-        // Leer todos los eventos con readAll()
-        // Filtrar por fecha (comparar solo YYYY-MM-DD)
-        // Retornar lista filtrada
-        return null;
+        List<LogEvent> allEvents = readAll();
+        List<LogEvent> filteredEvents = new ArrayList<>();
+
+        for (LogEvent event : allEvents) {
+            if (event.getTimestamp() != null && event.getTimestamp().startsWith(date)) {
+                filteredEvents.add(event);
+            }
+        }
+
+        log.info("Found {} log events for date: {}", filteredEvents.size(), date);
+        return filteredEvents;
     }
 
     public void setEncoding(String encoding) {
