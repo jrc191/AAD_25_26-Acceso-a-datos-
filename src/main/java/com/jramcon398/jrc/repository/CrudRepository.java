@@ -3,7 +3,7 @@ package com.jramcon398.jrc.repository;
 import org.springframework.stereotype.Repository;
 
 /**
- * CrudRepository interface defining basic CRUD operations.
+ * CrudRepository interface defining basic CRUD operations. Implemented by specific repositories (LogRepository).
  *
  * @param <T> the type of entity to be managed
  */

@@ -27,16 +27,19 @@ public class LogService implements CustomService<LogEvent> {
 
     private final LogRepository logRepository;
 
-    /**
-     * @param entity
-     * @return
-     */
     @Override
     public boolean validate(LogEvent entity) {
         return entity != null
                 && entity.getTimestamp() != null && !entity.getTimestamp().isEmpty()
                 && entity.getMessage() != null && !entity.getMessage().isEmpty();
     }
+
+    /**
+     * Adds a new LogEvent with the given message after validation.
+     *
+     * @param message message of the log event.
+     * @return created LogEvent or null if validation fails.
+     */
 
     public LogEvent addLogEvent(String message) {
         LogEvent logEvent = new LogEvent(message);
@@ -46,6 +49,14 @@ public class LogService implements CustomService<LogEvent> {
         log.warn(Constant.INVALID_LOG_EVENT);
         return null;
     }
+
+    /**
+     * Retrieves log events for a specific date.
+     * Uses Constant.DATE_FORMAT for date validation.
+     *
+     * @param date date in YYYY-MM-DD format.
+     * @return list of LogEvent for the specified date.
+     */
 
     public List<LogEvent> getEventsByDate(String date) {
         if (date == null || date.isEmpty()) {
@@ -66,6 +77,14 @@ public class LogService implements CustomService<LogEvent> {
     public List<LogEvent> getAllEvents() {
         return logRepository.readAll();
     }
+
+    /**
+     * Changes the encoding used for reading log files.
+     * Supported encodings are UTF-8 and ISO-8859-1.
+     *
+     * @param encoding Encoding to set.
+     * @return true if encoding changed successfully, false otherwise.
+     */
 
     public boolean changeEncoding(String encoding) {
         if (!encoding.equals(Constant.UTF_8.toString()) && !encoding.equals(Constant.ISO_8859_1.toString())) {

@@ -28,11 +28,14 @@ public class LogRepository implements CrudRepository<LogEvent> {
     private String encoding = Constant.UTF_8.toString(); // Configurable via application menu
 
     /**
-     * Creates a new log entry in the log file using the current encoding. Verifies and creates the log directory if it doesn't exist.
+     * Creates a new log entry in the log file using the current encoding.
+     * Verifies and creates the log directory if it doesn't exist.
+     * Formats the log entry as: [timestamp] message
      *
-     * @param entity
+     * @param entity entity to create.
      * @return LogEvent or null.
      */
+
     @Override
     public LogEvent create(LogEvent entity) {
 
@@ -63,6 +66,7 @@ public class LogRepository implements CrudRepository<LogEvent> {
 
     /**
      * Ensure the log directory exists; create it if it doesn't.
+     * This prevents errors when writing log files to non-existent directories.
      */
 
     private void ensureLogDirectoryExists() {
@@ -81,18 +85,20 @@ public class LogRepository implements CrudRepository<LogEvent> {
 
 
     /**
-     * @param entity
+     * @param entity entity to read
      * @return LogEvent or null . ALWAYS null, as reading individual log entries is not supported.
      */
+
     @Override
     public LogEvent read(LogEvent entity) {
         return null;
     }
 
     /**
-     * @param entity
-     * @return LogEvent or null . ALWAYS null, as updating log entries is not supported.
+     * @param entity entity to update
+     * @return LogEvent or null . ALWAYS null, as updating log entries is not supported by this application.
      */
+
     @Override
     public LogEvent update(LogEvent entity) {
         //Log files are info; updating existing entries is not supported.
@@ -100,9 +106,10 @@ public class LogRepository implements CrudRepository<LogEvent> {
     }
 
     /**
-     * @param entity
-     * @return boolean
+     * @param entity entity to delete
+     * @return boolean. ALWAYS false, as deleting log entries is not supported by this application.
      */
+
     @Override
     public boolean delete(LogEvent entity) {
         //Log files are info; deleting existing entries is not supported.
@@ -111,6 +118,7 @@ public class LogRepository implements CrudRepository<LogEvent> {
 
     /**
      * Reads all log events from the log file using the current encoding.
+     * Handles file not found.
      *
      * @return List of LogEvent objects read from the log file.
      */
@@ -124,7 +132,7 @@ public class LogRepository implements CrudRepository<LogEvent> {
             return logEvents;
         }
 
-        // Sequential file reading with InputStreamReader for encoding conversion
+        // Sequential file reading
         try (FileInputStream fis = new FileInputStream(logFile);
              InputStreamReader isr = new InputStreamReader(fis, Charset.forName(encoding));
              BufferedReader reader = new BufferedReader(isr)) {
@@ -160,9 +168,10 @@ public class LogRepository implements CrudRepository<LogEvent> {
      * Parses a single log line into a LogEvent object.
      * Expected format: [timestamp] message
      *
-     * @param line
-     * @return
+     * @param line line to parse
+     * @return LogEvent or null if parsing fails.
      */
+
     private LogEvent parseLogLine(String line) {
         if (line == null || line.trim().isEmpty()) {
             return null;

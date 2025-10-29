@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Constant utility class containing application-wide constants.
+ * Includes date/time formats, log file paths, error messages, character sets, and menu display.
  */
 
 @UtilityClass

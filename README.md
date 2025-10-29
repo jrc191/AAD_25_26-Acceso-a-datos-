@@ -56,7 +56,7 @@ The application is divided into several key components:
 
 To run the project, you will need:
 
-- **Java 17** or later
+- **Java 21** or later
 - **Maven 3.8+**
 - **Spring Boot 3.x**
 - A code editor such as IntelliJ IDEA or VS Code with Java support

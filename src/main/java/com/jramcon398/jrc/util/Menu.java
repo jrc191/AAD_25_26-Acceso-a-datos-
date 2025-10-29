@@ -9,6 +9,15 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Menu class used in Main app.
+ * Provides a console-based menu for user interaction.
+ * Handles adding log events, filtering by date, changing encoding, and displaying all logs.
+ *
+ * @see LogService
+ * @see InputValidation
+ */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -18,7 +27,6 @@ public final class Menu {
     private final LogService logService;
 
     public static String showMenu() {
-        // Mostrar opciones
         return Constant.MENU;
     }
 

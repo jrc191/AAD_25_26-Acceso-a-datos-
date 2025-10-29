@@ -11,7 +11,6 @@ import static com.jramcon398.jrc.util.Constant.DATE_TIME_FORMAT;
 
 /**
  * LogEvent model representing a log entry with timestamp and message.
- *
  */
 
 @Data

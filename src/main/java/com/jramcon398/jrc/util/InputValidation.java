@@ -22,7 +22,17 @@ import static com.jramcon398.jrc.util.Menu.showMenu;
 @UtilityClass
 public class InputValidation {
 
-    //Reusable method to validate menu option input. If needed can be extended to accept different ranges.
+    /**
+     * Validates menu option input from the user.
+     * Reusable method to ensure the input is within the specified range.
+     *
+     * @param scanner   scanner to read user input
+     * @param minOption minimum valid option
+     * @param maxOption maximum valid option
+     * @param prompt    prompt message to display to the user
+     * @return validated menu option
+     */
+
     public int validateMenuOption(Scanner scanner, int minOption, int maxOption, String prompt) {
 
         log.info(showMenu());
@@ -58,6 +68,15 @@ public class InputValidation {
 
         return input;
     }
+
+    /**
+     * Validates date input from the user.
+     * Ensures the date is in the correct format (YYYY-MM-DD).
+     *
+     * @param scanner scanner to read user input
+     * @param prompt  prompt message to display to the user
+     * @return validated date string
+     */
 
     public String validateDateInput(Scanner scanner, String prompt) {
 
