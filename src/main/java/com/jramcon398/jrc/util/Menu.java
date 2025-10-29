@@ -26,10 +26,6 @@ public final class Menu {
     private final Scanner scanner = new Scanner(System.in);
     private final LogService logService;
 
-    public static String showMenu() {
-        return Constant.MENU;
-    }
-
     public void execute() {
 
         boolean exit = false;

@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static com.jramcon398.jrc.util.Menu.showMenu;
-
 
 /**
  * InputValidation utility class providing methods for validating user inputs.
@@ -35,20 +33,20 @@ public class InputValidation {
 
     public int validateMenuOption(Scanner scanner, int minOption, int maxOption, String prompt) {
 
-        log.info(showMenu());
+        log.info(Constant.MENU);
         int option = -1;
         do {
 
             log.info(prompt);
             while (!scanner.hasNextInt()) {
-                log.info(showMenu());
+                log.info(Constant.MENU);
                 log.warn("Invalid input. Please enter a number between {} and {}.", minOption, maxOption);
                 scanner.next(); // clear invalid input
             }
             option = scanner.nextInt();
             scanner.nextLine();
             if (option < minOption || option > maxOption) {
-                log.info(showMenu());
+                log.info(Constant.MENU);
                 log.warn("Option out of range. Please enter a number between {} and {}.", minOption, maxOption);
             }
         } while (option < minOption || option > maxOption);
