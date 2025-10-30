@@ -7,6 +7,9 @@
 * [2. Cómo has levantado el servicio PostgreSQL.](#2-cómo-has-levantado-el-servicio-postgresql)
 * [3. DOCKER-COMPOSE.YML](#3-docker-composeyml)
 * [4. Cómo has conectado a la base de datos PostgreSQL.](#4-cómo-has-conectado-a-la-base-de-datos-postgresql)
+* [5. JDBC y su papel en la aplicación](#5-jdbc-y-su-papel-en-la-aplicación)
+* [6. `application.yml` y el código de prueba](#6-applicationyml-y-el-código-de-prueba)
+* [7. Ejecutar el contenedor y verificar la conexión desde IntelliJ](#7-ejecutar-el-contenedor-y-verificar-la-conexión-desde-intellij)
 
 <!-- TOC -->
 
