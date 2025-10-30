@@ -52,4 +52,52 @@
 | BBDD       | prueba    |
 | HOST       | localhost |
 
+# 5. JDBC y su papel en la aplicación
+
+- JDBC (Java Database Connectivity) es la API estándar de Java para conectar y ejecutar sentencias SQL en bases de
+  datos.
+- En esta aplicación se usa JDBC para abrir conexiones con PostgreSQL mediante `DriverManager.getConnection(...)`.
+- Un componente (bean) central encapsula la obtención de la conexión, carga del driver JDBC y gestión de credenciales;
+  así el resto de la aplicación solicita conexiones a ese componente y no gestiona directamente URL/credenciales.
+
+# 6. `application.yml` y el código de prueba
+
+- `application.yml` contiene las propiedades de conexión que inyecta Spring: `spring.datasource.url`,
+  `spring.datasource.username`, `spring.datasource.password` y `spring.datasource.driver-class-name`.
+- Asegurarse de que la clave del driver usa guiones: `driver-class-name`.
+- Código de prueba (resumen):
+    - Clase `PostgresqlDriver` anotada con `@Component`.
+    - Inyección por constructor con `@Value` para leer las propiedades de `application.yml`.
+    - En el constructor se intenta cargar la clase del driver (`Class.forName(...)`) para detectar problemas temprano.
+    - Método `getConnection()` devuelve `DriverManager.getConnection(url, username, password)`.
+- Verificar que el `pom.xml` incluye la dependencia `org.postgresql:postgresql`.
+
+# 7. Ejecutar el contenedor y verificar la conexión desde IntelliJ
+
+1. Levantar el contenedor:
+    - Abrir terminal en la raíz del proyecto (donde está `docker-compose.yml`).
+    - Ejecutar: `docker compose up -d`
+    - Comprobar que el contenedor está corriendo: `docker ps`
+
+2. Verificar puerto y accesibilidad:
+    - Asegurar que el contenedor publica el puerto `5432:5432`.
+    - Probar conexión con `psql`, DBeaver o PgAdmin usando los datos en la tabla anterior.
+
+3. Verificar desde IntelliJ (Database / Data Sources):
+    - Abrir ventana *Database* (View \> Tool Windows \> Database).
+    - Pulsar *+* \> *Data Source* \> *PostgreSQL*.
+    - Rellenar: Host `localhost`, Port `5432`, Database `prueba`, User `admin`, Password `admin`.
+    - Click en *Test Connection*; si falta el driver, IntelliJ ofrecerá descargarlo.
+
+4. Ejecutar la aplicación Spring Boot:
+    - Ejecutar `JrcApplication` desde IntelliJ (botón Run).
+    - Revisar logs: si las propiedades están correctas la aplicación creará el bean `PostgresqlDriver` y podrá obtener
+      conexiones.
+    - Si hay errores de propiedades no resueltas, ejecutar con `--debug` o revisar `application.yml`.
+
+5. Diagnóstico habitual:
+    - Propiedades mal escritas (p. ej. `driver-classname` vs `driver-class-name`).
+    - Dependencia de `org.postgresql:postgresql` faltante en `pom.xml`.
+    - Driver con nombre parcial o mal tipeado.
+
 
