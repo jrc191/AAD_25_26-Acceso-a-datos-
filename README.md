@@ -10,6 +10,8 @@
 * [5. JDBC y su papel en la aplicación](#5-jdbc-y-su-papel-en-la-aplicación)
 * [6. `application.yml` y el código de prueba](#6-applicationyml-y-el-código-de-prueba)
 * [7. Ejecutar el contenedor y verificar la conexión desde IntelliJ](#7-ejecutar-el-contenedor-y-verificar-la-conexión-desde-intellij)
+* [8. Descripción del modelo relacional](#8-descripción-del-modelo-relacional)
+* [9. Resumen del modelo relacional](#9-resumen-del-modelo-relacional)
 
 <!-- TOC -->
 
