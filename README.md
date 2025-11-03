@@ -134,20 +134,20 @@
    ```
 
 8. Descripción del modelo relacional
-   • Las tablas representan un sistema de gestión académica con alumnos, módulos y matrículas.
-   Relaciones entre tablas
-   • Un alumno puede estar matriculado en múltiples módulos (relación muchos a muchos).
-   • Un módulo puede tener múltiples alumnos matriculados.
-   • La tabla MATRICULA actúa como tabla intermedia para gestionar esta relación.
+    - Las tablas representan un sistema de gestión académica con alumnos, módulos y matrículas.
+    - Relaciones entre tablas
+        - Un alumno puede estar matriculado en múltiples módulos (relación muchos a muchos).
+        - Un módulo puede tener múltiples alumnos matriculados.
+        - La tabla MATRICULA actúa como tabla intermedia para gestionar esta relación.
 
 9. Resumen del modelo relacional
-   • Tablas:
-   o ALUMNO: almacena información de los alumnos (id, nombre, email).
-   o MODULO: almacena información de los módulos (id, nombre, horas).
-   o MATRICULA: tabla intermedia que relaciona alumnos y módulos, con fecha de matrícula.
+    - Tablas:
+        - ALUMNO: almacena información de los alumnos (id, nombre, email).
+        - MODULO: almacena información de los módulos (id, nombre, horas).
+        - MATRICULA: tabla intermedia que relaciona alumnos y módulos, con fecha de matrícula.
 
-   • Relaciones:
-   ▪ ALUMNO (1) ───< (N) MATRICULA (N) >─── (1) MODULO
+    - Relaciones:
+        - ALUMNO (1) ───< (N) MATRICULA (N) >─── (1) MODULO
 
 
 
