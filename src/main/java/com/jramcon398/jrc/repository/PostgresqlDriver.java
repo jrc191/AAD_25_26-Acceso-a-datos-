@@ -1,12 +1,18 @@
 package com.jramcon398.jrc.repository;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -16,6 +22,8 @@ public class PostgresqlDriver {
     private final String username;
     private final String password;
     private final String driverClassName;
+    @Value("classpath*:sql/*.sql")
+    private Resource[] scripts;
 
     public PostgresqlDriver(
             @Value("${spring.datasource.url}") String url,
@@ -36,4 +44,28 @@ public class PostgresqlDriver {
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, username, password);
     }
+
+    @PostConstruct
+    public void init() {
+        log.info("Initializing database...");
+        for (Resource script : scripts) {
+            executeSql(script);
+        }
+        log.info("Database initialized successfully!");
+    }
+
+    private void executeSql(Resource resource) {
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             BufferedReader reader = new BufferedReader(new
+                     InputStreamReader(resource.getInputStream()))) {
+            String sql = reader.lines().collect(Collectors.joining("\n"));
+            stmt.execute(sql);
+            log.info("Executed script: {}", resource.getFilename());
+        } catch (Exception e) {
+            log.error("Error executing script {}: {}",
+                    resource.getFilename(), e.getMessage());
+        }
+    }
+
 }

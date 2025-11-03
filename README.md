@@ -103,4 +103,49 @@
     - Dependencia de `org.postgresql:postgresql` faltante en `pom.xml`.
     - Driver con nombre parcial o mal tipeado.
 
+6. AMPLIACIÓN DE FUNCIONALIDAD DE LA CLASE POSTGRESQLDRIVER.JAVA
+   • Añadir métodos para crear las tablas ALUMNO, MODULO y MATRICULA.
+    - Uso de funciones init() y executeSql() para ejecutar las sentencias SQL de creación de tablas.
+
+7. Crear las tablas en la base de datos PostgreSQL
+   • Sentencias SQL para crear las tablas:
+    ```sql
+    CREATE TABLE IF NOT EXISTS alumno
+    (
+    id_alumno SERIAL PRIMARY KEY,
+    nombre    VARCHAR(100)        NOT NULL,
+    email     VARCHAR(100) UNIQUE NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS modulo
+    (
+    id_modulo SERIAL PRIMARY KEY,
+    nombre    VARCHAR(100) NOT NULL,
+    horas     INT CHECK (horas > 0)
+    );
+    CREATE TABLE IF NOT EXISTS matricula
+    (
+    id_alumno INT NOT NULL REFERENCES alumno (id_alumno) ON DELETE CASCADE,
+    id_modulo INT NOT NULL REFERENCES modulo (id_modulo) ON DELETE CASCADE,
+    fecha     DATE DEFAULT CURRENT_DATE,
+    PRIMARY KEY (id_alumno, id_modulo)
+    );
+   ```
+
+8. Descripción del modelo relacional
+   • Las tablas representan un sistema de gestión académica con alumnos, módulos y matrículas.
+   Relaciones entre tablas
+   • Un alumno puede estar matriculado en múltiples módulos (relación muchos a muchos).
+   • Un módulo puede tener múltiples alumnos matriculados.
+   • La tabla MATRICULA actúa como tabla intermedia para gestionar esta relación.
+
+9. Resumen del modelo relacional
+   • Tablas:
+   o ALUMNO: almacena información de los alumnos (id, nombre, email).
+   o MODULO: almacena información de los módulos (id, nombre, horas).
+   o MATRICULA: tabla intermedia que relaciona alumnos y módulos, con fecha de matrícula.
+
+   • Relaciones:
+   ▪ ALUMNO (1) ───< (N) MATRICULA (N) >─── (1) MODULO
+
+
 

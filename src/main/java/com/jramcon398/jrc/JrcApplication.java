@@ -29,6 +29,9 @@ public class JrcApplication implements CommandLineRunner {
                     conn.getMetaData().getURL());
             log.info("Database: {}",
                     conn.getMetaData().getDatabaseProductName());
+
+            postgresqlDriver.init();
+            
         } catch (Exception e) {
             log.error("Connection failed: {}", e.getMessage());
         }
