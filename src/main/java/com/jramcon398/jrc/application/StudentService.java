@@ -33,10 +33,29 @@ public class StudentService implements CustomService<Student> {
         return null;
     }
 
+    public Student read(final Student student) {
+        return studentRepository.read(student);
+    }
+
     public boolean deleteById(final Student student) {
         if (validate(student)) {
             return studentRepository.delete(student);
         }
         return false;
+    }
+
+    public Student updateStudent(final Student student) {
+        if (validate(student)) {
+            return studentRepository.update(student);
+        }
+        return null;
+    }
+
+    public boolean deleteAll() {
+
+        boolean result = studentRepository.deleteAll();
+
+        return result;
+
     }
 }
