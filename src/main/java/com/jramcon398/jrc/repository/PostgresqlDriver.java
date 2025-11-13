@@ -22,6 +22,7 @@ public class PostgresqlDriver {
     private final String username;
     private final String password;
     private final String driverClassName;
+    Connection connection;
     @Value("classpath*:sql/*.sql")
     private Resource[] scripts;
 
@@ -42,6 +43,7 @@ public class PostgresqlDriver {
     }
 
     public Connection getConnection() throws SQLException {
+        if (connection != null) return connection;
         return DriverManager.getConnection(url, username, password);
     }
 
@@ -68,4 +70,40 @@ public class PostgresqlDriver {
         }
     }
 
+
+    public void beginTransaction() throws SQLException {
+        if (connection != null) throw new IllegalStateException("connection already active");
+        connection = DriverManager.getConnection(url, username, password);
+        connection.setAutoCommit(false);
+    }
+
+    public void commit() throws SQLException {
+        if (connection == null) throw new IllegalStateException("No active connection");
+        try {
+            connection.commit();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                log.error("Close error: {}", e.getMessage());
+            }
+            connection = null;
+        }
+    }
+
+
+    public void rollback() {
+        if (connection == null) return;
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            log.error("Rollback error: {}", e.getMessage());
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                log.error("Close error: {}", e.getMessage());
+            }
+        }
+    }
 }
