@@ -1,10 +1,12 @@
 package com.jramcon398.jrc.repository;
 
+import java.util.List;
+
 public interface CrudRepository<T> {
 
     T insert(T entity);
 
-    T findAll();
+    List<T> findAll();
 
     T findById(int id);
 

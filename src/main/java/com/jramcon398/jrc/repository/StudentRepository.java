@@ -4,6 +4,8 @@ import com.jramcon398.jrc.models.Student;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @Slf4j
 public class StudentRepository implements CrudRepository<Student> {
@@ -23,7 +25,7 @@ public class StudentRepository implements CrudRepository<Student> {
      * @return
      */
     @Override
-    public Student findAll() {
+    public List<Student> findAll() {
         return null;
     }
 

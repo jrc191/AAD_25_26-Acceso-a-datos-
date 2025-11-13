@@ -1,5 +1,7 @@
 package com.jramcon398.jrc.repository;
 
+import java.util.List;
+
 public class ModuleRepository implements CrudRepository<Module> {
 
     /**
@@ -16,7 +18,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      * @return
      */
     @Override
-    public Module findAll() {
+    public List<Module> findAll() {
         return null;
     }
 

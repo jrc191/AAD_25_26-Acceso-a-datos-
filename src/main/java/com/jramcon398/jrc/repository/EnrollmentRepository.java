@@ -6,14 +6,16 @@ import java.util.List;
 
 public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
+    public Enrollment createEnrollment(Enrollment e, List<Module> modules) {
+        return null;
+    }
 
     /**
      * @param entity
-     * @param modules
      * @return
      */
     @Override
-    public Enrollment insert(Enrollment entity, List<Module> modules) {
+    public Enrollment insert(Enrollment entity) {
         return null;
     }
 
@@ -21,7 +23,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @return
      */
     @Override
-    public Enrollment findAll() {
+    public List<Enrollment> findAll() {
         return null;
     }
 
@@ -50,5 +52,11 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     @Override
     public boolean delete(int id) {
         return false;
+    }
+
+    public int countEnrollments(int studentId) {
+        
+
+        return 0;
     }
 }
