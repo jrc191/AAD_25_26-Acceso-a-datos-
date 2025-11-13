@@ -12,7 +12,7 @@ public class StudentManagementService implements CustomService<Student> {
      */
     @Override
     public boolean validate(Student entity) {
-        return !entity.getName().isEmpty() && entity.getId() > 0 && entity.getNif().isEmpty() && entity.getEmail().isEmpty();
+        return !entity.getName().isEmpty() && entity.getId() > 0 && !entity.getNif().isEmpty() && !entity.getEmail().isEmpty();
     }
 
     /**
