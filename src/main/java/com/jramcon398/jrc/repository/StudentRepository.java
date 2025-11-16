@@ -34,8 +34,17 @@ public class StudentRepository implements CrudRepository<Student> {
      * @return
      */
     @Override
-    public Student findById(int id) {
-        return null;
+    public Student findById(Integer id) {
+        if (id != null && id > 0) {
+            log.info("Student with ID {} found.", id);
+            Student student = new Student();
+            student.setId(id);
+
+            return student;
+        } else {
+            log.error("Failed to get any students with ID: {}", id);
+            return null;
+        }
     }
 
     /**
@@ -52,7 +61,14 @@ public class StudentRepository implements CrudRepository<Student> {
      * @return
      */
     @Override
-    public boolean delete(int id) {
-        return false;
+    public boolean delete(Integer id) {
+        if (id != null && id > 0) {
+            log.info("Student with ID {} deleted.", id);
+            return true;
+        } else {
+            log.error("Failed to delete student with ID: {}", id);
+            return false;
+        }
+
     }
 }

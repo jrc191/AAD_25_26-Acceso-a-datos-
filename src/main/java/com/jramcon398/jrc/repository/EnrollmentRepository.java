@@ -1,9 +1,13 @@
 package com.jramcon398.jrc.repository;
 
 import com.jramcon398.jrc.models.Enrollment;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
+@Slf4j
 public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
     public Enrollment createEnrollment(Enrollment e, List<Module> modules) {
@@ -32,7 +36,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @return
      */
     @Override
-    public Enrollment findById(int id) {
+    public Enrollment findById(Integer id) {
         return null;
     }
 
@@ -50,12 +54,12 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @return
      */
     @Override
-    public boolean delete(int id) {
+    public boolean delete(Integer id) {
         return false;
     }
 
     public int countEnrollments(int studentId) {
-        
+
 
         return 0;
     }

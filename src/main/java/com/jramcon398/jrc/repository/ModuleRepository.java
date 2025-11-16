@@ -1,7 +1,13 @@
 package com.jramcon398.jrc.repository;
 
+import com.jramcon398.jrc.models.Module;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
+@Repository
+@Slf4j
 public class ModuleRepository implements CrudRepository<Module> {
 
     /**
@@ -27,7 +33,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      * @return
      */
     @Override
-    public Module findById(int id) {
+    public Module findById(Integer id) {
         return null;
     }
 
@@ -46,7 +52,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      * @return
      */
     @Override
-    public boolean delete(int id) {
+    public boolean delete(Integer id) {
         return false;
     }
 
