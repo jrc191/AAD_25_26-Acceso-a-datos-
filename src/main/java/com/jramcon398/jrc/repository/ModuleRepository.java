@@ -35,18 +35,19 @@ public class ModuleRepository implements CrudRepository<Module> {
             ps.setString(2, module.getName());
             ps.setInt(3, module.getHours());
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                module.setId(rs.getInt("id_modulo"));
-                log.info("Module inserted: {}", module);
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                log.info("Successfully added module: {}", module);
                 return module;
+            } else {
+                log.error("Failed to insert module, no rows affected");
+                return null;
             }
 
         } catch (SQLException e) {
             log.error("Error inserting module: {}", e.getMessage());
             throw new RuntimeException("Error inserting module", e);
         }
-        return null;
     }
 
     /**
