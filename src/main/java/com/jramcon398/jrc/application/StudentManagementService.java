@@ -145,7 +145,7 @@ public class StudentManagementService implements CustomService<Student> {
             var module = moduleRepository.findById(moduleId);
             if (module == null) throw new IllegalArgumentException("Module not found: " +
                     moduleId);
-            Enrollment created = enrollmentRepository.insert(new Enrollment(LocalDate.now(), null, student.getId(), module.getId()));
+            Enrollment created = enrollmentRepository.insert(new Enrollment(LocalDate.now(), student.getId(), module.getId()));
             postgresqlDriver.commit();
             return created;
         } catch (Exception e) {
