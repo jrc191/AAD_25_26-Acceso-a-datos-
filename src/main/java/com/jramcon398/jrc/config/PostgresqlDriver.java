@@ -70,7 +70,6 @@ public class PostgresqlDriver {
         }
     }
 
-
     public void beginTransaction() throws SQLException {
         if (connection != null) throw new IllegalStateException("connection already active");
         connection = DriverManager.getConnection(url, username, password);

@@ -7,6 +7,9 @@ import com.jramcon398.jrc.models.Student;
 import com.jramcon398.jrc.repository.EnrollmentRepository;
 import com.jramcon398.jrc.repository.ModuleRepository;
 import com.jramcon398.jrc.repository.StudentRepository;
+import com.jramcon398.jrc.utils.EnrollmentValidator;
+import com.jramcon398.jrc.utils.ModuleValidator;
+import com.jramcon398.jrc.utils.StudentValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +28,11 @@ public class StudentManagementService implements CustomService<Student> {
     private final EnrollmentRepository enrollmentRepository;
 
     /**
-     * Some basic validation for Student entity.
+     * Validates Student entity using StudentValidator utility class.
+     * Returns true if all fields are valid, false otherwise.
+     *
+     * @param entity Student to validate
+     * @return boolean indicating if student is valid
      */
     @Override
     public boolean validateStudent(Student entity) {
@@ -34,21 +41,30 @@ public class StudentManagementService implements CustomService<Student> {
             return false;
         }
 
-        boolean isValid = (entity.getName() != null && !entity.getName().isEmpty())
-                && (entity.getNif() != null && !entity.getNif().isEmpty())
-                && (entity.getEmail() != null && !entity.getEmail().isEmpty());
+        try {
+            // Validations
+            StudentValidator.validateId(entity.getId());
+            StudentValidator.validateNif(entity.getNif());
+            StudentValidator.validateName(entity.getName());
+            StudentValidator.validateEmail(entity.getEmail());
+            StudentValidator.validateCourse(entity.getCourse());
+            StudentValidator.validateModules(entity.getModules());
 
-        if (!isValid) {
-            log.warn("Student validation failed: {}", entity);
+            log.info("Student validation passed: {}", entity);
+            return true;
+        } catch (Exception e) {
+            log.warn("Student validation failed: {} - {}", entity, e.getMessage());
+            return false;
         }
-
-        return isValid;
     }
 
     /**
      * Creates a new module in the system.
      * Before inserting, checks if a module with the same code already exists.
      * If exists, returns it; if not, inserts and returns the new persisted entity.
+     *
+     * @param module Module to create
+     * @return Created Module or existing one if code already exists
      */
     @Override
     public Module createModule(Module module) {
@@ -58,26 +74,22 @@ public class StudentManagementService implements CustomService<Student> {
             throw new IllegalArgumentException("Module cannot be null");
         }
 
-        // Some validations
-        if (module.getCode() == null || module.getCode().isEmpty()) {
-            throw new IllegalArgumentException("Module code cannot be null or empty");
-        }
-        if (module.getName() == null || module.getName().isEmpty()) {
-            throw new IllegalArgumentException("Module name cannot be null or empty");
-        }
-        if (module.getHours() == null || module.getHours() <= 0) {
-            throw new IllegalArgumentException("Module hours must be greater than 0");
-        }
+        // Validate module using ModuleValidator
+        Module validatedModule = new Module();
+        validatedModule.setId(ModuleValidator.validateId(module.getId()));
+        validatedModule.setCode(ModuleValidator.validateCode(module.getCode()));
+        validatedModule.setName(ModuleValidator.validateName(module.getName()));
+        validatedModule.setHours(ModuleValidator.validateHours(module.getHours()));
 
-        // Usar la versión sin conexión (que maneja su propia conexión)
-        Module existingModule = moduleRepository.findByCode(module.getCode());
+        // Check if module with same code already exists
+        Module existingModule = moduleRepository.findByCode(validatedModule.getCode());
         if (existingModule != null) {
-            log.info("Module with code {} already exists, returning existing module", module.getCode());
+            log.warn("Module with code {} already exists, returning existing module", validatedModule.getCode());
             return existingModule;
         }
 
-        // Insertar el nuevo módulo
-        Module createdModule = moduleRepository.insert(module);
+        // Insert the new module
+        Module createdModule = moduleRepository.insert(validatedModule);
         log.info("Module created successfully: {}", createdModule);
         return createdModule;
     }
@@ -87,8 +99,8 @@ public class StudentManagementService implements CustomService<Student> {
      * Before inserting, checks if a student with the same ID already exists.
      * If exists, returns it; if not, inserts and returns the new persisted entity.
      *
-     * @param student
-     * @return
+     * @param student Student to create
+     * @return Created Student or existing one if ID already exists
      */
     @Override
     public Student createStudent(Student student) {
@@ -98,33 +110,37 @@ public class StudentManagementService implements CustomService<Student> {
             throw new IllegalArgumentException("Student cannot be null");
         }
 
-        //Some validations
-        if (!validateStudent(student)) {
-            throw new IllegalArgumentException("Student validation failed. Check name, NIF and email fields.");
-        }
+        // Validations
+        Student validatedStudent = new Student();
+        validatedStudent.setId(StudentValidator.validateId(student.getId()));
+        validatedStudent.setNif(StudentValidator.validateNif(student.getNif()));
+        validatedStudent.setName(StudentValidator.validateName(student.getName()));
+        validatedStudent.setEmail(StudentValidator.validateEmail(student.getEmail()));
+        validatedStudent.setCourse(StudentValidator.validateCourse(student.getCourse()));
+        validatedStudent.setModules(StudentValidator.validateModules(student.getModules()));
 
-        //Check if exists
-        Student existingStudent = studentRepository.findByNif(student.getNif());
+        // Check if existing student
+        Student existingStudent = studentRepository.findByNif(validatedStudent.getNif());
         if (existingStudent != null) {
-            log.warn("Student with NIF {} already exists, returning existing student", student.getNif());
+            log.warn("Student with NIF {} already exists, returning existing student", validatedStudent.getNif());
             return existingStudent;
         }
 
-        //Then insert
-        Student createdStudent = studentRepository.insert(student);
+        // Then insert
+        Student createdStudent = studentRepository.insert(validatedStudent);
         log.info("Student created successfully: {}", createdStudent);
         return createdStudent;
     }
 
     /**
-     * Enrrolls a student in a module.
+     * Enrolls a student in a module.
      * First checks if both student and module exist.
      * If any of them does not exist, throws an exception.
      * If both exist, creates a new enrollment record linking them.
      *
-     * @param studentId
-     * @param moduleId
-     * @return
+     * @param studentId ID of the student to enroll
+     * @param moduleId  ID of the module to enroll the student in
+     * @return Created Enrollment record linking student and module
      */
     @Override
     public Enrollment enrollStudentInModule(Integer studentId, Integer moduleId) {
@@ -132,24 +148,33 @@ public class StudentManagementService implements CustomService<Student> {
             postgresqlDriver.beginTransaction();
             Connection conn = postgresqlDriver.getConnection();
 
-            // Check if student exists
-            var student = studentRepository.findById(studentId, conn);
+            // Validations
+            Integer validatedStudentId = EnrollmentValidator.validateStudentId(studentId);
+            Integer validatedModuleId = EnrollmentValidator.validateModuleId(moduleId);
+
+            // Check existence of student, so we can enroll
+            var student = studentRepository.findById(validatedStudentId, conn);
             if (student == null) {
-                log.error("Cannot find student with id: {}", studentId);
+                log.error("Cannot find student with id: {}", validatedStudentId);
+                postgresqlDriver.rollback();
                 return null;
             }
 
-            // Check if module exists
-            var module = moduleRepository.findById(moduleId, conn);
+            // Check if module exists, so we can enroll
+            var module = moduleRepository.findById(validatedModuleId, conn);
             if (module == null) {
-                log.error("Module not found: {}", moduleId);
+                log.error("Module not found: {}", validatedModuleId);
+                postgresqlDriver.rollback();
                 return null;
-
             }
 
-            //Then enroll
-            Enrollment created = enrollmentRepository.insert(new Enrollment(LocalDate.now(), student.getId(), module.getId()), conn);
-            postgresqlDriver.commit();
+            // Create enrollment with validated date
+            LocalDate enrollmentDate = EnrollmentValidator.validateDate(LocalDate.now());
+            Enrollment enrollment = new Enrollment(enrollmentDate, student.getId(), module.getId());
+
+            Enrollment created = enrollmentRepository.insert(enrollment, conn);
+            postgresqlDriver.commit(); // Commit transaction
+            log.info("Successfully enrolled student {} in module {}", validatedStudentId, validatedModuleId);
             return created;
         } catch (Exception e) {
             postgresqlDriver.rollback();
@@ -158,12 +183,11 @@ public class StudentManagementService implements CustomService<Student> {
         }
     }
 
-
     /**
      * Gets the number of enrollments for a given student.
      *
-     * @param studentId
-     * @return
+     * @param studentId ID of the student
+     * @return Number of enrollments for the student
      */
     public int getEnrollmentCount(Integer studentId) {
         log.info("Getting enrollment count for student {}", studentId);
