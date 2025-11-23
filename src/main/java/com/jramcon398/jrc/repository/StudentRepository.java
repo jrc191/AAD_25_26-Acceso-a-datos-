@@ -21,6 +21,8 @@ public class StudentRepository implements CrudRepository<Student> {
     private final PostgresqlDriver postgresqlDriver;
 
     /**
+     * Inserts student in the database
+     *
      * @param student to insert
      * @return Student inserted
      */
@@ -58,6 +60,8 @@ public class StudentRepository implements CrudRepository<Student> {
     }
 
     /**
+     * Lists all students
+     *
      * @return List<Student> of all students
      */
 
@@ -127,6 +131,13 @@ public class StudentRepository implements CrudRepository<Student> {
         }
     }
 
+    /**
+     * Finds a student by NIF.
+     *
+     * @param nif of the student to find
+     * @return Student found or null if not found
+     */
+
     public Student findByNif(String nif) {
         String sql = "SELECT id_alumno, nif, nombre, email FROM alumno WHERE nif = ?";
 
@@ -153,6 +164,8 @@ public class StudentRepository implements CrudRepository<Student> {
     }
 
     /**
+     * Updates a student in the database
+     *
      * @param student to update
      * @return Student updated
      */
@@ -179,6 +192,8 @@ public class StudentRepository implements CrudRepository<Student> {
     }
 
     /**
+     * Deletes a student by ID
+     *
      * @param id of the student to delete
      * @return true if deleted, false otherwiseº
      */

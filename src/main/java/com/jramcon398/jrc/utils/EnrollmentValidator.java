@@ -9,6 +9,10 @@ import java.time.LocalDate;
 @UtilityClass
 public class EnrollmentValidator {
 
+    /**
+     * Validation methods for Enrollment fields
+     */
+
     public LocalDate validateDate(LocalDate date) {
         if (date == null) {
             log.error("Enrollment date cannot be null. Setting default: current date");

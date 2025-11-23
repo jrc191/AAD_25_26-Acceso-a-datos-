@@ -7,6 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class ModuleValidator {
 
+    /**
+     * Validation methods for Module fields
+     */
+
     public Integer validateId(Integer id) {
         if (id == null) {
             return null;

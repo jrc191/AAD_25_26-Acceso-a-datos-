@@ -24,6 +24,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @param conn       active connection
      * @return Enrollment inserted
      */
+
     public Enrollment insert(Enrollment enrollment, Connection conn) {
         String sql = "INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES (?, ?, ?)";
 
@@ -114,6 +115,13 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
         return enrollments;
     }
 
+    /**
+     * Not applicable for Enrollment. Use findByStudent instead.
+     *
+     * @param id
+     * @return
+     */
+
     @Override
     public Enrollment findById(Integer id) {
         throw new UnsupportedOperationException("Use findByStudent to find enrollments by student ID");
@@ -139,7 +147,6 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @param moduleId
      */
 
-
     public void deleteByBothKeys(int studentId, int moduleId) {
         String sql = "DELETE FROM matricula WHERE id_alumno = ? AND id_modulo = ?";
 
@@ -158,6 +165,12 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
         }
     }
 
+    /**
+     * Not applicable for Enrollment. Use deleteByBothKeys instead.
+     *
+     * @param id
+     * @return
+     */
     @Override
     public boolean delete(Integer id) {
         throw new UnsupportedOperationException("Use deleteByBothKeys to delete enrollment by student ID and module ID");

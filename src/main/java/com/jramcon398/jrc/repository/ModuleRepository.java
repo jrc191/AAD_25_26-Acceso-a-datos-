@@ -21,6 +21,8 @@ public class ModuleRepository implements CrudRepository<Module> {
     private final PostgresqlDriver postgresqlDriver;
 
     /**
+     * Inserts module in the database
+     *
      * @param module to insert
      * @return Module inserted
      */
@@ -54,6 +56,8 @@ public class ModuleRepository implements CrudRepository<Module> {
     }
 
     /**
+     * Searches and returns all modules
+     *
      * @return List<Module> of all modules
      */
     @Override
@@ -122,7 +126,14 @@ public class ModuleRepository implements CrudRepository<Module> {
         }
     }
 
-    // Transaction version
+    /**
+     * Finds a module by code using provided connection (for transactions)
+     *
+     * @param code of the module to find
+     * @param conn active connection
+     * @return Module found or null
+     */
+
     public Module findByCode(String code, Connection conn) {
         String sql = "SELECT id_modulo, codigo, nombre, horas FROM modulo WHERE codigo = ?";
 
@@ -158,6 +169,8 @@ public class ModuleRepository implements CrudRepository<Module> {
     }
 
     /**
+     * Updates module in the database
+     *
      * @param module to update
      * @return Module updated
      */
@@ -184,6 +197,8 @@ public class ModuleRepository implements CrudRepository<Module> {
     }
 
     /**
+     * Deletes module from the database
+     *
      * @param id of the module to delete
      * @return boolean indicating success
      */
