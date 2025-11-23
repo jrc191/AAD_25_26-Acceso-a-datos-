@@ -2,76 +2,43 @@ package com.jramcon398.jrc.repository;
 
 import com.jramcon398.jrc.config.PostgresqlDriver;
 import com.jramcon398.jrc.models.Enrollment;
-import com.jramcon398.jrc.models.Module;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class EnrollmentRepository {
+public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
     private final PostgresqlDriver postgresqlDriver;
 
     /**
-     * Create enrollment records for a student in multiple modules
-     *
-     * @param enrollment Enrollment object containing student ID and date
-     * @param modules    List of Module objects to enroll the student in
-     * @return Enrollment object
+     * @param enrollment to insert
+     * @return Enrollment inserted
      */
+    @Override
+    public Enrollment insert(Enrollment enrollment) {
+        String sql = "INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES (?, ?, ?)";
 
-    public Enrollment createEnrollment(Enrollment enrollment, List<Module> modules) {
-        Connection conn = null;
-        try {
-            conn = postgresqlDriver.getConnection();
-            conn.setAutoCommit(false);
+        try (Connection conn = postgresqlDriver.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // enrollment for each module
-            String sql = "INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES (?, ?, ?)";
+            ps.setInt(1, enrollment.getStudentId());
+            ps.setInt(2, enrollment.getModuleId());
+            ps.setDate(3, Date.valueOf(enrollment.getDate()));
 
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                for (Module module : modules) {
-                    ps.setInt(1, enrollment.getStudentId());
-                    ps.setInt(2, module.getId());
-                    ps.setDate(3, java.sql.Date.valueOf(enrollment.getDate()));
-                    ps.executeUpdate();
-                }
-            }
-
-            //All done, commit
-            conn.commit();
-            log.info("Enrollment created successfully for student {} with {} modules", enrollment.getStudentId(), modules.size());
+            int rowsAffected = ps.executeUpdate();
+            log.info("Enrollment created: {} (rows affected: {})", enrollment, rowsAffected);
             return enrollment;
 
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException rollbackEx) {
-                    log.error("Error during rollback: {}", rollbackEx.getMessage());
-                }
-            }
             log.error("Error creating enrollment: {}", e.getMessage());
             throw new RuntimeException("Error creating enrollment", e);
-        } finally {
-            if (conn != null) {
-                try {
-                    //Get back to default
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException closeEx) {
-                    log.error("Error closing connection: {}", closeEx.getMessage());
-                }
-            }
         }
     }
 
@@ -79,6 +46,7 @@ public class EnrollmentRepository {
      * @return List<Enrollment> of all enrollments
      */
 
+    @Override
     public List<Enrollment> findAll() {
         String sql = "SELECT id_alumno, id_modulo, fecha FROM matricula";
         List<Enrollment> enrollments = new ArrayList<>();
@@ -92,7 +60,7 @@ public class EnrollmentRepository {
                 enrollments.add(enrollment);
             }
 
-            log.info("Found {} enrollment records", enrollments.size());
+            log.info("Found {} enrollments", enrollments.size());
 
         } catch (SQLException e) {
             log.error("Error finding all enrollments: {}", e.getMessage());
@@ -103,8 +71,10 @@ public class EnrollmentRepository {
     }
 
     /**
-     * @param studentId of the student to find enrollments for
-     * @return List<Enrollment> found
+     * Finds enrollments by student ID.
+     *
+     * @param studentId
+     * @return List<Enrollment>
      */
 
     public List<Enrollment> findByStudent(int studentId) {
@@ -126,19 +96,39 @@ public class EnrollmentRepository {
 
         } catch (SQLException e) {
             log.error("Error finding enrollments for student {}: {}", studentId, e.getMessage());
-            throw new RuntimeException("Error finding enrollments by student", e);
+            throw new RuntimeException("Error finding enrollments for student", e);
         }
 
         return enrollments;
     }
 
+    @Override
+    public Enrollment findById(Integer id) {
+        throw new UnsupportedOperationException("Use findByStudent to find enrollments by student ID");
+    }
+
     /**
-     * @param studentId of the student
-     * @param moduleId  of the module
-     * @return boolean indicating if delete was successful
+     * No sense to update an enrollment. It depends on both student and module.
+     * Only could update the date, but it's not useful.
+     *
+     * @param entity
+     * @return
+     */
+    @Override
+    public Enrollment update(Enrollment entity) {
+        throw new UnsupportedOperationException("Update operation is not supported for Enrollment");
+    }
+
+    /**
+     * Deletes an enrollment by student ID and module ID.
+     * Deletes the record matching both keys.
+     *
+     * @param studentId
+     * @param moduleId
      */
 
-    public boolean delete(int studentId, int moduleId) {
+
+    public void deleteByBothKeys(int studentId, int moduleId) {
         String sql = "DELETE FROM matricula WHERE id_alumno = ? AND id_modulo = ?";
 
         try (Connection conn = postgresqlDriver.getConnection();
@@ -147,42 +137,42 @@ public class EnrollmentRepository {
             ps.setInt(1, studentId);
             ps.setInt(2, moduleId);
             int rowsAffected = ps.executeUpdate();
-            log.info("Enrollment deleted: student={}, module={} (rows affected: {})", studentId, moduleId, rowsAffected);
-
-            return rowsAffected > 0;
+            log.info("Enrollment deleted: studentId={}, moduleId={} (rows affected: {})",
+                    studentId, moduleId, rowsAffected);
 
         } catch (SQLException e) {
-            log.error("Error deleting enrollment student={}, module={}: {}", studentId, moduleId, e.getMessage());
+            log.error("Error deleting enrollment: {}", e.getMessage());
             throw new RuntimeException("Error deleting enrollment", e);
         }
     }
 
+    @Override
+    public boolean delete(Integer id) {
+        throw new UnsupportedOperationException("Use deleteByBothKeys to delete enrollment by student ID and module ID");
+    }
+
     /**
-     * @param studentId of the student
-     * @return int count of enrollments for the student using stored function
+     * Calls the stored procedure to count enrollments for a given student.
+     *
+     * @param studentId of the student to count enrollments for
+     * @return total enrollments
      */
-
     public int countEnrollments(int studentId) {
-        String sql = "SELECT count_enrollments(?)";
+        String sql = "{ ? = call count_enrollments(?) }";
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, studentId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                int count = rs.getInt(1);
-                log.info("Found {} enrollments for student {} using stored function", count, studentId);
-                return count;
-            }
-
+        try (Connection con = postgresqlDriver.getConnection();
+             CallableStatement cs = con.prepareCall(sql)) {
+            cs.registerOutParameter(1, Types.INTEGER);
+            cs.setInt(2, studentId);
+            cs.execute();
+            int total = cs.getInt(1);
+            log.info("Total enrollments: {} ", total);
+            return total;
         } catch (SQLException e) {
-            log.error("Error counting enrollments for student {} using stored function: {}", studentId, e.getMessage());
+            log.error("Error counting enrollments for student {}: {}", studentId, e.getMessage());
             throw new RuntimeException("Error counting enrollments", e);
         }
 
-        return 0;
     }
 
     private Enrollment mapRow(ResultSet rs) throws SQLException {

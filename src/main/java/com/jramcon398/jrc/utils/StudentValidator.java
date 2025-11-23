@@ -13,9 +13,14 @@ public class StudentValidator {
 
     public Integer validateId(Integer id) {
         if (id == null) {
-            log.error("Student ID cannot be null. Setting default: {}", Constants.DEFAULT_STUDENT_ID);
+            return null;
+        }
+
+        if (id <= 0) {
+            log.error("Student ID must be positive. Received: {}", id);
             return Constants.DEFAULT_STUDENT_ID;
         }
+
         return id;
     }
 

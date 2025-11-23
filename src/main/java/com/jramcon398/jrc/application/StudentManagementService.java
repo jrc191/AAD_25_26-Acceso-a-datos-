@@ -7,7 +7,6 @@ import com.jramcon398.jrc.models.Student;
 import com.jramcon398.jrc.repository.EnrollmentRepository;
 import com.jramcon398.jrc.repository.ModuleRepository;
 import com.jramcon398.jrc.repository.StudentRepository;
-import com.jramcon398.jrc.utils.Constants;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,7 @@ public class StudentManagementService implements CustomService<Student> {
     private final EnrollmentRepository enrollmentRepository;
 
     /**
-     * @param entity
-     * @return
+     * Valida que un estudiante tenga todos los campos obligatorios correctos
      */
     @Override
     public boolean validateStudent(Student entity) {
@@ -34,103 +32,95 @@ public class StudentManagementService implements CustomService<Student> {
             log.error("Cannot validate null student");
             return false;
         }
-        return (entity.getId() != null && entity.getId() > 0)
-                && (entity.getName() != null && !entity.getName().isEmpty())
+
+        boolean isValid = (entity.getName() != null && !entity.getName().isEmpty())
                 && (entity.getNif() != null && !entity.getNif().isEmpty())
-                && (entity.getEmail() != null && !entity.getEmail().isEmpty())
-                && (entity.getCourse() != null && !entity.getCourse().isEmpty());
-    }
+                && (entity.getEmail() != null && !entity.getEmail().isEmpty());
 
-    public boolean validateModule(Module entity) {
-        if (entity == null) {
-            log.error("Cannot validate null module");
-            return false;
+        if (!isValid) {
+            log.warn("Student validation failed: {}", entity);
         }
-        return (entity.getId() != null && entity.getId() > 0)
-                && (entity.getName() != null && !entity.getName().isEmpty())
-                && (entity.getCode() != null && !entity.getCode().isEmpty())
-                && (entity.getHours() != null && entity.getHours() > 0);
+
+        return isValid;
     }
 
     /**
-     * @param entity
+     * Crea un nuevo módulo en el sistema.
+     * Antes de insertarlo, comprueba si ya existe un módulo con el mismo código.
+     * Si existe, lo devuelve; si no, lo inserta y devuelve la nueva entidad persistida.
+     */
+    @Override
+    public Module createModule(Module module) {
+        log.info("Creating module: {}", module);
+
+        if (module == null) {
+            throw new IllegalArgumentException("Module cannot be null");
+        }
+
+        //Some validations
+        if (module.getCode() == null || module.getCode().isEmpty()) {
+            throw new IllegalArgumentException("Module code cannot be null or empty");
+        }
+        if (module.getName() == null || module.getName().isEmpty()) {
+            throw new IllegalArgumentException("Module name cannot be null or empty");
+        }
+        if (module.getHours() == null || module.getHours() <= 0) {
+            throw new IllegalArgumentException("Module hours must be greater than 0");
+        }
+
+        //Check if exists
+        Module existingModule = moduleRepository.findById(module.getId());
+        if (existingModule != null) {
+            log.info("Module with code {} already exists, returning existing module", module.getCode());
+            return existingModule;
+        }
+
+        // Insertar el nuevo módulo
+        Module createdModule = moduleRepository.insert(module);
+        log.info("Module created successfully: {}", createdModule);
+        return createdModule;
+    }
+
+    /**
+     * Creates a new student in the system.
+     * Before inserting, checks if a student with the same ID already exists.
+     * If exists, returns it; if not, inserts and returns the new persisted entity.
+     *
+     * @param student
      * @return
      */
     @Override
-    public Module createModule(Module entity) {
-        if (entity == null) {
-            log.error("Cannot create null module. Creating default module.");
-            return new Module(0, "NO-CODE", "NO-NAME", 0);
+    public Student createStudent(Student student) {
+        log.info("Creating student: {}", student);
+
+        if (student == null) {
+            throw new IllegalArgumentException("Student cannot be null");
         }
 
-        try {
-
-            Module existingModule = moduleRepository.findById(entity.getId());
-            if (existingModule != null) {
-                log.info("Module with code {} already exists. Returning existing module.", entity.getCode());
-                return existingModule;
-            }
-
-            if (!validateModule(entity)) {
-                log.error("Module validation failed for module: {}. Returning module with applied defaults.", entity);
-                return entity;
-            }
-
-            Module savedModule = moduleRepository.insert(entity);
-            if (savedModule == null) {
-                log.error("Repository returned null when saving module. Returning original module.");
-                return entity;
-            }
-
-            log.info("Module created successfully: {}", savedModule);
-            return savedModule;
-
-
-        } catch (Exception e) {
-            log.error("Error creating module: {}. Returning module with defaults.", e.getMessage(), e);
-            return entity;
+        //Some validations
+        if (!validateStudent(student)) {
+            throw new IllegalArgumentException("Student validation failed. Check name, NIF and email fields.");
         }
+
+        //Check if exists
+        Student existingStudent = studentRepository.findById(student.getId());
+        if (existingStudent != null) {
+            log.warn("Student with NIF {} already exists, returning existing student", student.getNif());
+            return existingStudent;
+        }
+
+        //Then insert
+        Student createdStudent = studentRepository.insert(student);
+        log.info("Student created successfully: {}", createdStudent);
+        return createdStudent;
     }
 
     /**
-     * @param entity
-     * @return
-     */
-    @Override
-    public Student createStudent(Student entity) {
-        if (entity == null) {
-            log.error("Cannot create null student. Creating default student.");
-            return new Student(Constants.DEFAULT_STUDENT_ID, Constants.DEFAULT_NIF, Constants.DEFAULT_NAME, Constants.DEFAULT_EMAIL, Constants.DEFAULT_COURSE);
-        }
-
-        try {
-            Student existingStudent = studentRepository.findById(entity.getId());
-            if (existingStudent != null) {
-                log.info("Student with ID {} already exists. Returning existing student.", entity.getNif());
-                return existingStudent;
-            }
-
-            if (!validateStudent(entity)) {
-                log.error("Student validation failed for student: {}. Returning student with defaults.", entity);
-                return entity;
-            }
-
-            Student savedStudent = studentRepository.insert(entity);
-            if (savedStudent == null) {
-                log.error("Repository returned null when saving student. Returning original student.");
-                return entity;
-            }
-
-            log.info("Student created successfully: {}", savedStudent);
-            return savedStudent;
-
-        } catch (Exception e) {
-            log.error("Error creating student: {}. Returning student with defaults.", e.getMessage(), e);
-            return entity;
-        }
-    }
-
-    /**
+     * Enrrolls a student in a module.
+     * First checks if both student and module exist.
+     * If any of them does not exist, throws an exception.
+     * If both exist, creates a new enrollment record linking them.
+     *
      * @param studentId
      * @param moduleId
      * @return
@@ -143,8 +133,7 @@ public class StudentManagementService implements CustomService<Student> {
             if (student == null) throw new IllegalArgumentException("Student not found: " +
                     studentId);
             var module = moduleRepository.findById(moduleId);
-            if (module == null) throw new IllegalArgumentException("Module not found: " +
-                    moduleId);
+            if (module == null) throw new IllegalArgumentException("Module not found: " + moduleId);
             Enrollment created = enrollmentRepository.insert(new Enrollment(LocalDate.now(), student.getId(), module.getId()));
             postgresqlDriver.commit();
             return created;
@@ -154,11 +143,22 @@ public class StudentManagementService implements CustomService<Student> {
         }
     }
 
-    private Student createDefaultStudent() {
-        Student defaultStudent = new Student(0, "UNKNOWN", "Unnamed Student", "no-email@unknown.com", "UNKNOWN");
-        log.debug("Created default student: {}", defaultStudent);
-        return defaultStudent;
+    /**
+     * Gets the number of enrollments for a given student.
+     *
+     * @param studentId
+     * @return
+     */
+    public int getEnrollmentCount(Integer studentId) {
+        log.info("Getting enrollment count for student {}", studentId);
+
+        if (studentId == null) {
+            throw new IllegalArgumentException("Student ID cannot be null");
+        }
+
+        int count = enrollmentRepository.countEnrollments(studentId);
+        log.info("Student {} has {} enrollments", studentId, count);
+
+        return count;
     }
-
-
 }
