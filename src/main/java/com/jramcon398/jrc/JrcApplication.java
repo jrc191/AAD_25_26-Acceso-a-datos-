@@ -28,7 +28,7 @@ public class JrcApplication implements CommandLineRunner {
         Module programacion = new Module(1, "0485", "Programación", 250);
         miriam = studentManagementService.createStudent(miriam);
         programacion = studentManagementService.createModule(programacion);
-        studentManagementService.enrollStudentInModule(miriam.getId(), programacion.getId());
+        //studentManagementService.enrollStudentInModule(miriam.getId(), programacion.getId());
         studentRepository.delete(miriam.getId());
     }
 }

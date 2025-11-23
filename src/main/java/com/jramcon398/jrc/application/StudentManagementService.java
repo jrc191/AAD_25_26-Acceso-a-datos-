@@ -7,6 +7,7 @@ import com.jramcon398.jrc.models.Student;
 import com.jramcon398.jrc.repository.EnrollmentRepository;
 import com.jramcon398.jrc.repository.ModuleRepository;
 import com.jramcon398.jrc.repository.StudentRepository;
+import com.jramcon398.jrc.utils.Constants;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -99,11 +100,10 @@ public class StudentManagementService implements CustomService<Student> {
     public Student createStudent(Student entity) {
         if (entity == null) {
             log.error("Cannot create null student. Creating default student.");
-            return new Student(0, "UNKNOWN", "Unnamed Student", "no-email@unknown.com", "UNKNOWN");
+            return new Student(Constants.DEFAULT_STUDENT_ID, Constants.DEFAULT_NIF, Constants.DEFAULT_NAME, Constants.DEFAULT_EMAIL, Constants.DEFAULT_COURSE);
         }
 
         try {
-
             Student existingStudent = studentRepository.findById(entity.getId());
             if (existingStudent != null) {
                 log.info("Student with ID {} already exists. Returning existing student.", entity.getNif());
