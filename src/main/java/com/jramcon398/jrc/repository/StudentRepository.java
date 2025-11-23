@@ -35,12 +35,16 @@ public class StudentRepository implements CrudRepository<Student> {
             ps.setString(2, student.getName());
             ps.setString(3, student.getEmail());
 
+            log.debug("Executing insert for student: {}", student);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int generatedId = rs.getInt("id_alumno");
                     student.setId(generatedId);
                     log.info("Successfully added student with ID {}: {}", generatedId, student);
                     return student;
+                } else {
+                    log.error("No result set returned from INSERT");
                 }
             }
 

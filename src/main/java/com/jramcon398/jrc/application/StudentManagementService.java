@@ -134,11 +134,18 @@ public class StudentManagementService implements CustomService<Student> {
 
             // Check if student exists
             var student = studentRepository.findById(studentId, conn);
-            if (student == null) throw new IllegalArgumentException("Student not found: " + studentId);
+            if (student == null) {
+                log.error("Cannot find student with id: {}", studentId);
+                return null;
+            }
 
             // Check if module exists
             var module = moduleRepository.findById(moduleId, conn);
-            if (module == null) throw new IllegalArgumentException("Module not found: " + moduleId);
+            if (module == null) {
+                log.error("Module not found: {}", moduleId);
+                return null;
+
+            }
 
             //Then enroll
             Enrollment created = enrollmentRepository.insert(new Enrollment(LocalDate.now(), student.getId(), module.getId()), conn);
@@ -146,9 +153,11 @@ public class StudentManagementService implements CustomService<Student> {
             return created;
         } catch (Exception e) {
             postgresqlDriver.rollback();
-            throw new RuntimeException("Error enrolling student in module", e);
+            log.error("Error enrolling student {} in module {}: {}", studentId, moduleId, e.getMessage());
+            return null;
         }
     }
+
 
     /**
      * Gets the number of enrollments for a given student.

@@ -39,7 +39,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
         } catch (SQLException e) {
             log.error("Error creating enrollment: {}", e.getMessage());
-            throw new RuntimeException("Error creating enrollment", e);
+            return null;
         }
     }
 
