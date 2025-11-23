@@ -26,7 +26,7 @@ public class StudentRepository implements CrudRepository<Student> {
      */
     @Override
     public Student insert(Student student) {
-        String sql = "INSERT INTO alumno (nif, nombre, email) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO alumno (nif, nombre, email) VALUES (?, ?, ?) RETURNING id_alumno";
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -35,11 +35,13 @@ public class StudentRepository implements CrudRepository<Student> {
             ps.setString(2, student.getName());
             ps.setString(3, student.getEmail());
 
-            int rowsAffected = ps.executeUpdate();
-
-            if (rowsAffected > 0) {
-                log.info("Successfully added student: {}", student);
-                return student;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int generatedId = rs.getInt("id_alumno");
+                    student.setId(generatedId);
+                    log.info("Successfully added student with ID {}: {}", generatedId, student);
+                    return student;
+                }
             }
 
             log.error("Failed to insert student, no ID generated");
@@ -80,31 +82,70 @@ public class StudentRepository implements CrudRepository<Student> {
     }
 
     /**
-     * @param id of the student to find
-     * @return Student found
+     * Finds a student by ID using provided connection (for transactions)
+     *
+     * @param id   of the student to find
+     * @param conn Connection to use
+     * @return Student found or null if not found
      */
-    @Override
-    public Student findById(Integer id) {
+    public Student findById(Integer id, Connection conn) {
         String sql = "SELECT id_alumno, nif, nombre, email FROM alumno WHERE id_alumno = ?";
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                Student student = mapRow(rs);
-                log.info("Student found: {}", student);
-                return student;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Student student = mapRow(rs);
+                    log.info("Found student: {}", student);
+                    return student;
+                }
+
+                log.warn("Student not found with id: {}", id);
+                return null;
             }
 
         } catch (SQLException e) {
             log.error("Error finding student by id {}: {}", id, e.getMessage());
             throw new RuntimeException("Error finding student by id", e);
         }
+    }
 
-        return null;
+    //No transaction version
+    @Override
+    public Student findById(Integer id) {
+        try (Connection conn = postgresqlDriver.getConnection()) {
+            return findById(id, conn);
+        } catch (SQLException e) {
+            log.error("Error getting connection: {}", e.getMessage());
+            throw new RuntimeException("Error finding student", e);
+        }
+    }
+
+    public Student findByNif(String nif) {
+        String sql = "SELECT id_alumno, nif, nombre, email FROM alumno WHERE nif = ?";
+
+        try (Connection conn = postgresqlDriver.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, nif);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Student student = mapRow(rs);
+                    log.info("Found student by NIF: {}", student);
+                    return student;
+                }
+
+                log.warn("Student not found with NIF: {}", nif);
+                return null;
+            }
+
+        } catch (SQLException e) {
+            log.error("Error finding student by NIF {}: {}", nif, e.getMessage());
+            throw new RuntimeException("Error finding student by NIF", e);
+        }
     }
 
     /**

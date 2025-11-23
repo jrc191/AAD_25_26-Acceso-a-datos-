@@ -29,7 +29,7 @@ public class Student {
         this.nif = validateNif(nif);
         this.name = validateName(name);
         this.email = validateEmail(email);
-        this.course = validateCourse(course);
+        this.course = course;
         this.modules = new ArrayList<>();
     }
 
@@ -39,7 +39,7 @@ public class Student {
         this.nif = validateNif(nif);
         this.name = validateName(name);
         this.email = validateEmail(email);
-        this.course = validateCourse(course);
+        this.course = course;
         this.modules = validateModules(modules);
     }
 

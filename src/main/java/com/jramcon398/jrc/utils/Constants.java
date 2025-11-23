@@ -18,7 +18,13 @@ public class Constants {
 
     //Enrollment defaults
     public static final int DEFAULT_ENROLLMENT_ID = 0;
-    public static final int DEFAULT_MODULE_ID = 0;
+
+    //Module defaults
+    // En Constants.java - agregar estas constantes
+    public static final Integer DEFAULT_MODULE_ID = 0;
+    public static final String DEFAULT_MODULE_CODE = "NO-CODE";
+    public static final String DEFAULT_MODULE_NAME = "NO-NAME";
+    public static final Integer DEFAULT_MODULE_HOURS = 0;
 
 
 }

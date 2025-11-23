@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
 import java.time.LocalDate;
 
 @Service
@@ -24,7 +25,7 @@ public class StudentManagementService implements CustomService<Student> {
     private final EnrollmentRepository enrollmentRepository;
 
     /**
-     * Valida que un estudiante tenga todos los campos obligatorios correctos
+     * Some basic validation for Student entity.
      */
     @Override
     public boolean validateStudent(Student entity) {
@@ -45,9 +46,9 @@ public class StudentManagementService implements CustomService<Student> {
     }
 
     /**
-     * Crea un nuevo módulo en el sistema.
-     * Antes de insertarlo, comprueba si ya existe un módulo con el mismo código.
-     * Si existe, lo devuelve; si no, lo inserta y devuelve la nueva entidad persistida.
+     * Creates a new module in the system.
+     * Before inserting, checks if a module with the same code already exists.
+     * If exists, returns it; if not, inserts and returns the new persisted entity.
      */
     @Override
     public Module createModule(Module module) {
@@ -57,7 +58,7 @@ public class StudentManagementService implements CustomService<Student> {
             throw new IllegalArgumentException("Module cannot be null");
         }
 
-        //Some validations
+        // Some validations
         if (module.getCode() == null || module.getCode().isEmpty()) {
             throw new IllegalArgumentException("Module code cannot be null or empty");
         }
@@ -68,8 +69,8 @@ public class StudentManagementService implements CustomService<Student> {
             throw new IllegalArgumentException("Module hours must be greater than 0");
         }
 
-        //Check if exists
-        Module existingModule = moduleRepository.findById(module.getId());
+        // Usar la versión sin conexión (que maneja su propia conexión)
+        Module existingModule = moduleRepository.findByCode(module.getCode());
         if (existingModule != null) {
             log.info("Module with code {} already exists, returning existing module", module.getCode());
             return existingModule;
@@ -103,7 +104,7 @@ public class StudentManagementService implements CustomService<Student> {
         }
 
         //Check if exists
-        Student existingStudent = studentRepository.findById(student.getId());
+        Student existingStudent = studentRepository.findByNif(student.getNif());
         if (existingStudent != null) {
             log.warn("Student with NIF {} already exists, returning existing student", student.getNif());
             return existingStudent;
@@ -129,12 +130,18 @@ public class StudentManagementService implements CustomService<Student> {
     public Enrollment enrollStudentInModule(Integer studentId, Integer moduleId) {
         try {
             postgresqlDriver.beginTransaction();
-            var student = studentRepository.findById(studentId);
-            if (student == null) throw new IllegalArgumentException("Student not found: " +
-                    studentId);
-            var module = moduleRepository.findById(moduleId);
+            Connection conn = postgresqlDriver.getConnection();
+
+            // Check if student exists
+            var student = studentRepository.findById(studentId, conn);
+            if (student == null) throw new IllegalArgumentException("Student not found: " + studentId);
+
+            // Check if module exists
+            var module = moduleRepository.findById(moduleId, conn);
             if (module == null) throw new IllegalArgumentException("Module not found: " + moduleId);
-            Enrollment created = enrollmentRepository.insert(new Enrollment(LocalDate.now(), student.getId(), module.getId()));
+
+            //Then enroll
+            Enrollment created = enrollmentRepository.insert(new Enrollment(LocalDate.now(), student.getId(), module.getId()), conn);
             postgresqlDriver.commit();
             return created;
         } catch (Exception e) {

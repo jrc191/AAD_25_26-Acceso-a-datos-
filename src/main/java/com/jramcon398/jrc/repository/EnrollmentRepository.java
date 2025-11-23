@@ -18,15 +18,16 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     private final PostgresqlDriver postgresqlDriver;
 
     /**
+     * Inserts enrollment using provided connection (for transactions)
+     *
      * @param enrollment to insert
+     * @param conn       active connection
      * @return Enrollment inserted
      */
-    @Override
-    public Enrollment insert(Enrollment enrollment) {
+    public Enrollment insert(Enrollment enrollment, Connection conn) {
         String sql = "INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES (?, ?, ?)";
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, enrollment.getStudentId());
             ps.setInt(2, enrollment.getModuleId());
@@ -38,6 +39,17 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
         } catch (SQLException e) {
             log.error("Error creating enrollment: {}", e.getMessage());
+            throw new RuntimeException("Error creating enrollment", e);
+        }
+    }
+
+    // No transaction version
+    @Override
+    public Enrollment insert(Enrollment enrollment) {
+        try (Connection conn = postgresqlDriver.getConnection()) {
+            return insert(enrollment, conn);
+        } catch (SQLException e) {
+            log.error("Error getting connection: {}", e.getMessage());
             throw new RuntimeException("Error creating enrollment", e);
         }
     }

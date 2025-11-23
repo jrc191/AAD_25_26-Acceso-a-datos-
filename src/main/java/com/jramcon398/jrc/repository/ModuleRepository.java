@@ -26,7 +26,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public Module insert(Module module) {
-        String sql = "INSERT INTO modulo (codigo, nombre, horas) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO modulo (codigo, nombre, horas) VALUES (?, ?, ?) RETURNING id_modulo";
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -35,14 +35,17 @@ public class ModuleRepository implements CrudRepository<Module> {
             ps.setString(2, module.getName());
             ps.setInt(3, module.getHours());
 
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                log.info("Successfully added module: {}", module);
-                return module;
-            } else {
-                log.error("Failed to insert module, no rows affected");
-                return null;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int generatedId = rs.getInt("id_modulo");
+                    module.setId(generatedId);
+                    log.info("Successfully added module with ID {}: {}", generatedId, module);
+                    return module;
+                }
             }
+
+            log.error("Failed to insert module, no ID generated");
+            return null;
 
         } catch (SQLException e) {
             log.error("Error inserting module: {}", e.getMessage());
@@ -78,31 +81,80 @@ public class ModuleRepository implements CrudRepository<Module> {
     }
 
     /**
-     * @param id of the module to find
+     * Finds a module by ID using provided connection (for transactions)
+     *
+     * @param id   of the module to find
+     * @param conn active connection
      * @return Module found or null
      */
-    @Override
-    public Module findById(Integer id) {
+    public Module findById(Integer id, Connection conn) {
         String sql = "SELECT id_modulo, codigo, nombre, horas FROM modulo WHERE id_modulo = ?";
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                Module module = mapRow(rs);
-                log.info("Module found: {}", module);
-                return module;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Module module = mapRow(rs);
+                    log.info("Found module: {}", module);
+                    return module;
+                }
+
+                log.warn("Module not found with id: {}", id);
+                return null;
             }
 
         } catch (SQLException e) {
             log.error("Error finding module by id {}: {}", id, e.getMessage());
             throw new RuntimeException("Error finding module by id", e);
         }
+    }
 
-        return null;
+    //No transaction version
+    @Override
+    public Module findById(Integer id) {
+        try (Connection conn = postgresqlDriver.getConnection()) {
+            return findById(id, conn);
+        } catch (SQLException e) {
+            log.error("Error getting connection: {}", e.getMessage());
+            throw new RuntimeException("Error finding module", e);
+        }
+    }
+
+    // Transaction version
+    public Module findByCode(String code, Connection conn) {
+        String sql = "SELECT id_modulo, codigo, nombre, horas FROM modulo WHERE codigo = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, code);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Module module = mapRow(rs);
+                    log.info("Found module by code: {}", module);
+                    return module;
+                }
+
+                log.warn("Module not found with code: {}", code);
+                return null;
+            }
+
+        } catch (SQLException e) {
+            log.error("Error finding module by code {}: {}", code, e.getMessage());
+            throw new RuntimeException("Error finding module by code", e);
+        }
+    }
+
+    // For no transaction use
+    public Module findByCode(String code) {
+        try (Connection conn = postgresqlDriver.getConnection()) {
+            return findByCode(code, conn);
+        } catch (SQLException e) {
+            log.error("Error getting connection: {}", e.getMessage());
+            throw new RuntimeException("Error finding module by code", e);
+        }
     }
 
     /**

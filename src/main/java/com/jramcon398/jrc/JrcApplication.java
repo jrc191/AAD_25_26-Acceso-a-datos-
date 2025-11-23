@@ -24,8 +24,8 @@ public class JrcApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        Student miriam = new Student(1, "66280457T", "Miriam", "miriam@g.educaand.es", "DAW");
-        Module programacion = new Module(1, "0485", "Programación", 250);
+        Student miriam = new Student(null, "66280457T", "Miriam", "miriam@g.educaand.es", "DAW");
+        Module programacion = new Module(null, "0485", "Programación", 250);
         miriam = studentManagementService.createStudent(miriam);
         programacion = studentManagementService.createModule(programacion);
         studentManagementService.enrollStudentInModule(miriam.getId(), programacion.getId());
