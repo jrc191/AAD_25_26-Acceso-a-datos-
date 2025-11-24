@@ -2,6 +2,7 @@ package com.jramcon398.jrc.repository;
 
 import com.jramcon398.jrc.config.PostgresqlDriver;
 import com.jramcon398.jrc.models.Student;
+import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -28,7 +29,7 @@ public class StudentRepository implements CrudRepository<Student> {
      */
     @Override
     public Student insert(Student student) {
-        String sql = "INSERT INTO alumno (nif, nombre, email) VALUES (?, ?, ?) RETURNING id_alumno";
+        String sql = SQLQueries.Student_Queries.INSERT;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -67,7 +68,7 @@ public class StudentRepository implements CrudRepository<Student> {
 
     @Override
     public List<Student> findAll() {
-        String sql = "SELECT id_alumno, nif, nombre, email FROM alumno";
+        String sql = SQLQueries.Student_Queries.FIND_ALL;
         List<Student> students = new ArrayList<>();
 
         try (Connection conn = postgresqlDriver.getConnection();
@@ -97,7 +98,7 @@ public class StudentRepository implements CrudRepository<Student> {
      * @return Student found or null if not found
      */
     public Student findById(Integer id, Connection conn) {
-        String sql = "SELECT id_alumno, nif, nombre, email FROM alumno WHERE id_alumno = ?";
+        String sql = SQLQueries.Student_Queries.FIND_BY_ID;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -139,7 +140,7 @@ public class StudentRepository implements CrudRepository<Student> {
      */
 
     public Student findByNif(String nif) {
-        String sql = "SELECT id_alumno, nif, nombre, email FROM alumno WHERE nif = ?";
+        String sql = SQLQueries.Student_Queries.FIND_BY_NIF;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -149,11 +150,11 @@ public class StudentRepository implements CrudRepository<Student> {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Student student = mapRow(rs);
-                    log.info("Found student by NIF: {}", student);
+                    log.warn("Found student by NIF: {}", student);
                     return student;
                 }
 
-                log.warn("Student not found with NIF: {}", nif);
+                log.info("Student not found with NIF: {}", nif);
                 return null;
             }
 
@@ -171,7 +172,7 @@ public class StudentRepository implements CrudRepository<Student> {
      */
     @Override
     public Student update(Student student) {
-        String sql = "UPDATE alumno SET nif = ?, nombre = ?, email = ? WHERE id_alumno = ?";
+        String sql = SQLQueries.Student_Queries.UPDATE;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -199,7 +200,7 @@ public class StudentRepository implements CrudRepository<Student> {
      */
     @Override
     public boolean delete(Integer id) {
-        String sql = "DELETE FROM alumno WHERE id_alumno = ?";
+        String sql = SQLQueries.Student_Queries.DELETE;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

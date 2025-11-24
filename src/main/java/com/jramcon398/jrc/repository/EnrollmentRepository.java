@@ -2,6 +2,7 @@ package com.jramcon398.jrc.repository;
 
 import com.jramcon398.jrc.config.PostgresqlDriver;
 import com.jramcon398.jrc.models.Enrollment;
+import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      */
 
     public Enrollment insert(Enrollment enrollment, Connection conn) {
-        String sql = "INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES (?, ?, ?)";
+        String sql = SQLQueries.EnrollmentQueries.INSERT;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -56,12 +57,14 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     }
 
     /**
+     * Find all enrollments.
+     *
      * @return List<Enrollment> of all enrollments
      */
 
     @Override
     public List<Enrollment> findAll() {
-        String sql = "SELECT id_alumno, id_modulo, fecha FROM matricula";
+        String sql = SQLQueries.EnrollmentQueries.FIND_ALL;
         List<Enrollment> enrollments = new ArrayList<>();
 
         try (Connection conn = postgresqlDriver.getConnection();
@@ -91,7 +94,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      */
 
     public List<Enrollment> findByStudent(int studentId) {
-        String sql = "SELECT id_alumno, id_modulo, fecha FROM matricula WHERE id_alumno = ?";
+        String sql = SQLQueries.EnrollmentQueries.FIND_BY_STUDENT;
         List<Enrollment> enrollments = new ArrayList<>();
 
         try (Connection conn = postgresqlDriver.getConnection();
@@ -148,7 +151,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      */
 
     public void deleteByBothKeys(int studentId, int moduleId) {
-        String sql = "DELETE FROM matricula WHERE id_alumno = ? AND id_modulo = ?";
+        String sql = SQLQueries.EnrollmentQueries.DELETE_BY_BOTH_KEYS;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -183,7 +186,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @return total enrollments
      */
     public int countEnrollments(int studentId) {
-        String sql = "{ ? = call count_enrollments(?) }";
+        String sql = SQLQueries.EnrollmentQueries.COUNT_ENROLLMENTS;
 
         try (Connection con = postgresqlDriver.getConnection();
              CallableStatement cs = con.prepareCall(sql)) {

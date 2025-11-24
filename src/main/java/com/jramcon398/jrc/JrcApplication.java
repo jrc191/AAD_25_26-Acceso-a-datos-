@@ -30,7 +30,7 @@ public class JrcApplication implements CommandLineRunner {
         programacion = studentManagementService.createModule(programacion);
         studentManagementService.enrollStudentInModule(miriam.getId(), programacion.getId());
         studentRepository.delete(miriam.getId());
-        int count = studentManagementService.getEnrollmentCount(miriam.getId());
-        log.info("Student {} has {} enrollments", miriam.getId(), count);
+        studentManagementService.getEnrollmentCount(miriam.getId());
+
     }
 }

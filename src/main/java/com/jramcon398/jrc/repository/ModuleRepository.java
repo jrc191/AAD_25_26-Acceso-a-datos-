@@ -2,6 +2,7 @@ package com.jramcon398.jrc.repository;
 
 import com.jramcon398.jrc.config.PostgresqlDriver;
 import com.jramcon398.jrc.models.Module;
+import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -28,7 +29,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public Module insert(Module module) {
-        String sql = "INSERT INTO modulo (codigo, nombre, horas) VALUES (?, ?, ?) RETURNING id_modulo";
+        String sql = SQLQueries.Module_Queries.INSERT;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -62,7 +63,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public List<Module> findAll() {
-        String sql = "SELECT id_modulo, codigo, nombre, horas FROM modulo";
+        String sql = SQLQueries.Module_Queries.FIND_ALL;
         List<Module> modules = new ArrayList<>();
 
         try (Connection conn = postgresqlDriver.getConnection();
@@ -92,7 +93,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      * @return Module found or null
      */
     public Module findById(Integer id, Connection conn) {
-        String sql = "SELECT id_modulo, codigo, nombre, horas FROM modulo WHERE id_modulo = ?";
+        String sql = SQLQueries.Module_Queries.FIND_BY_ID;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -135,7 +136,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
 
     public Module findByCode(String code, Connection conn) {
-        String sql = "SELECT id_modulo, codigo, nombre, horas FROM modulo WHERE codigo = ?";
+        String sql = SQLQueries.Module_Queries.FIND_BY_CODE;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -176,7 +177,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public Module update(Module module) {
-        String sql = "UPDATE modulo SET codigo = ?, nombre = ?, horas = ? WHERE id_modulo = ?";
+        String sql = SQLQueries.Module_Queries.UPDATE;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -204,7 +205,7 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public boolean delete(Integer id) {
-        String sql = "DELETE FROM modulo WHERE id_modulo = ?";
+        String sql = SQLQueries.Module_Queries.DELETE;
 
         try (Connection conn = postgresqlDriver.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
