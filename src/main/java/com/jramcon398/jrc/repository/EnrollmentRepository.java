@@ -89,7 +89,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     /**
      * Finds enrollments by student ID.
      *
-     * @param studentId
+     * @param studentId of the student
      * @return List<Enrollment>
      */
 
@@ -121,7 +121,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     /**
      * Not applicable for Enrollment. Use findByStudent instead.
      *
-     * @param id
+     * @param id of the enrollment
      * @return
      */
 
@@ -134,11 +134,11 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * No sense to update an enrollment. It depends on both student and module.
      * Only could update the date, but it's not useful.
      *
-     * @param entity
-     * @return
+     * @param enrollment to update
+     * @return Enrollment updated
      */
     @Override
-    public Enrollment update(Enrollment entity) {
+    public Enrollment update(Enrollment enrollment) {
         throw new UnsupportedOperationException("Update operation is not supported for Enrollment");
     }
 
@@ -146,8 +146,9 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * Deletes an enrollment by student ID and module ID.
      * Deletes the record matching both keys.
      *
-     * @param studentId
-     * @param moduleId
+     * @param studentId of the student
+     * @param moduleId  of the module
+     *
      */
 
     public void deleteByBothKeys(int studentId, int moduleId) {
@@ -171,8 +172,8 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     /**
      * Not applicable for Enrollment. Use deleteByBothKeys instead.
      *
-     * @param id
-     * @return
+     * @param id of the enrollment to delete
+     * @return boolean indicating success
      */
     @Override
     public boolean delete(Integer id) {

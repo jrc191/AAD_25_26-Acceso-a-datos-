@@ -18,8 +18,7 @@ public class Enrollment {
     private LocalDate date;
     private Integer studentId;
     private Integer moduleId;
-
-    // Constructor with validation
+    
     public Enrollment(LocalDate date, Integer studentId, Integer moduleId) {
         this.date = validateDate(date);
         this.studentId = validateStudentId(studentId);
