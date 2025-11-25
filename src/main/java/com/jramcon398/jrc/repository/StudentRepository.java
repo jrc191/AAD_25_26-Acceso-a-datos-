@@ -11,9 +11,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -173,13 +170,4 @@ public class StudentRepository implements CrudRepository<Student> {
         }
     }
 
-    private Student mapRow(ResultSet rs) throws SQLException {
-        Student student = new Student();
-        student.setId(rs.getInt("id_alumno"));
-        student.setNif(rs.getString("nif"));
-        student.setName(rs.getString("nombre"));
-        student.setEmail(rs.getString("email"));
-        student.setModules(new ArrayList<>());
-        return student;
-    }
 }

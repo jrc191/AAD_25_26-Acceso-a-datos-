@@ -4,13 +4,13 @@ import com.jramcon398.jrc.models.Module;
 import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 public class ModuleRepository implements CrudRepository<Module> {
 
-    private final PostgresqlDriver postgresqlDriver;
+    private final JdbcTemplate jdbcTemplate;
 
     /**
      * Inserts module in the database
@@ -28,31 +28,24 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public Module insert(Module module) {
-        String sql = SQLQueries.Module_Queries.INSERT;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    SQLQueries.Module_Queries.INSERT,
+                    new String[]{"id_modulo"}
+            );
             ps.setString(1, module.getCode());
             ps.setString(2, module.getName());
             ps.setInt(3, module.getHours());
+            return ps;
+        }, keyHolder);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int generatedId = rs.getInt("id_modulo");
-                    module.setId(generatedId);
-                    log.info("Successfully added module with ID {}: {}", generatedId, module);
-                    return module;
-                }
-            }
+        Integer generatedId = keyHolder.getKey().intValue();
+        module.setId(generatedId);
 
-            log.error("Failed to insert module, no ID generated");
-            return null;
-
-        } catch (SQLException e) {
-            log.error("Error inserting module: {}", e.getMessage());
-            throw new RuntimeException("Error inserting module", e);
-        }
+        log.info("Successfully added module with ID {}: {}", generatedId, module);
+        return module;
     }
 
     /**
@@ -62,67 +55,39 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public List<Module> findAll() {
-        String sql = SQLQueries.Module_Queries.FIND_ALL;
-        List<Module> modules = new ArrayList<>();
-
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Module module = mapRow(rs);
-                modules.add(module);
-            }
-
-            log.info("Found {} modules", modules.size());
-
-        } catch (SQLException e) {
-            log.error("Error finding all modules: {}", e.getMessage());
-            throw new RuntimeException("Error finding all modules", e);
-        }
-
-        return modules;
+        return jdbcTemplate.query(
+                SQLQueries.Module_Queries.FIND_ALL,
+                (rs, rowNum) -> new Module(
+                        rs.getInt("id_modulo"),
+                        rs.getString("codigo"),
+                        rs.getString("nombre"),
+                        rs.getInt("horas")
+                )
+        );
     }
 
     /**
      * Finds a module by ID using provided connection (for transactions)
      *
-     * @param id   of the module to find
-     * @param conn active connection
      * @return Module found or null
      */
-    public Module findById(Integer id, Connection conn) {
-        String sql = SQLQueries.Module_Queries.FIND_BY_ID;
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Module module = mapRow(rs);
-                    log.info("Found module: {}", module);
-                    return module;
-                }
-
-                log.warn("Module not found with id: {}", id);
-                return null;
-            }
-
-        } catch (SQLException e) {
-            log.error("Error finding module by id {}: {}", id, e.getMessage());
-            throw new RuntimeException("Error finding module by id", e);
-        }
-    }
-
-    //No transaction version
-    @Override
     public Module findById(Integer id) {
-        try (Connection conn = postgresqlDriver.getConnection()) {
-            return findById(id, conn);
-        } catch (SQLException e) {
-            log.error("Error getting connection: {}", e.getMessage());
-            throw new RuntimeException("Error finding module", e);
+        try {
+            Module module = jdbcTemplate.queryForObject(
+                    SQLQueries.Module_Queries.FIND_BY_ID,
+                    (rs, rowNum) -> new Module(
+                            rs.getInt("id_modulo"),
+                            rs.getString("codigo"),
+                            rs.getString("nombre"),
+                            rs.getInt("horas")
+                    ),
+                    id
+            );
+            log.info("Found module: {}", module);
+            return module;
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("Module not found with id: {}", id);
+            return null;
         }
     }
 
@@ -130,41 +95,26 @@ public class ModuleRepository implements CrudRepository<Module> {
      * Finds a module by code using provided connection (for transactions)
      *
      * @param code of the module to find
-     * @param conn active connection
      * @return Module found or null
      */
 
-    public Module findByCode(String code, Connection conn) {
-        String sql = SQLQueries.Module_Queries.FIND_BY_CODE;
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, code);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Module module = mapRow(rs);
-                    log.info("Found module by code: {}", module);
-                    return module;
-                }
-
-                log.warn("Module not found with code: {}", code);
-                return null;
-            }
-
-        } catch (SQLException e) {
-            log.error("Error finding module by code {}: {}", code, e.getMessage());
-            throw new RuntimeException("Error finding module by code", e);
-        }
-    }
-
-    // For no transaction use
     public Module findByCode(String code) {
-        try (Connection conn = postgresqlDriver.getConnection()) {
-            return findByCode(code, conn);
-        } catch (SQLException e) {
-            log.error("Error getting connection: {}", e.getMessage());
-            throw new RuntimeException("Error finding module by code", e);
+        try {
+            Module module = jdbcTemplate.queryForObject(
+                    SQLQueries.Module_Queries.FIND_BY_CODE,
+                    (rs, rowNum) -> new Module(
+                            rs.getInt("id_modulo"),
+                            rs.getString("codigo"),
+                            rs.getString("nombre"),
+                            rs.getInt("horas")
+                    ),
+                    code
+            );
+            log.info("Found module by code: {}", module);
+            return module;
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("Module not found with code: {}", code);
+            return null;
         }
     }
 
@@ -176,23 +126,20 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public Module update(Module module) {
-        String sql = SQLQueries.Module_Queries.UPDATE;
+        int rowsAffected = jdbcTemplate.update(
+                SQLQueries.Module_Queries.UPDATE,
+                module.getCode(),
+                module.getName(),
+                module.getHours(),
+                module.getId()
+        );
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, module.getCode());
-            ps.setString(2, module.getName());
-            ps.setInt(3, module.getHours());
-            ps.setInt(4, module.getId());
-
-            int rowsAffected = ps.executeUpdate();
+        if (rowsAffected > 0) {
             log.info("Module updated: {} (rows affected: {})", module, rowsAffected);
             return module;
-
-        } catch (SQLException e) {
-            log.error("Error updating module {}: {}", module.getId(), e.getMessage());
-            throw new RuntimeException("Error updating module", e);
+        } else {
+            log.warn("No module found with id: {}", module.getId());
+            return null;
         }
     }
 
@@ -204,29 +151,18 @@ public class ModuleRepository implements CrudRepository<Module> {
      */
     @Override
     public boolean delete(Integer id) {
-        String sql = SQLQueries.Module_Queries.DELETE;
+        int rowsAffected = jdbcTemplate.update(
+                SQLQueries.Module_Queries.DELETE,
+                id
+        );
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-            int rowsAffected = ps.executeUpdate();
+        if (rowsAffected > 0) {
             log.info("Module deleted: id={} (rows affected: {})", id, rowsAffected);
-
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            log.error("Error deleting module {}: {}", id, e.getMessage());
-            throw new RuntimeException("Error deleting module", e);
+            return true;
+        } else {
+            log.warn("No module found with id: {}", id);
+            return false;
         }
     }
 
-    private Module mapRow(ResultSet rs) throws SQLException {
-        Module module = new Module();
-        module.setId(rs.getInt("id_modulo"));
-        module.setCode(rs.getString("codigo"));
-        module.setName(rs.getString("nombre"));
-        module.setHours(rs.getInt("horas"));
-        return module;
-    }
 }
