@@ -40,7 +40,13 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
             return enrollment;
 
         } catch (SQLException e) {
-            log.error("Error creating enrollment: {}", e.getMessage());
+            String sqlState = e.getSQLState();
+            // SQL State 23505 indicates a unique constraint violation (duplicate key)
+            if ("23505".equals(sqlState)) {
+                log.warn("Enrollment already exists for student {} and module {} (constraint violation, duplicated key)", enrollment.getStudentId(), enrollment.getModuleId());
+                return null;
+            }
+            log.error("Error inserting enrollment: {}", e.getMessage());
             return null;
         }
     }

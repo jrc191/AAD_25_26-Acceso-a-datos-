@@ -15,7 +15,7 @@ public class EnrollmentValidator {
 
     public LocalDate validateDate(LocalDate date) {
         if (date == null) {
-            log.error("Enrollment date cannot be null. Setting default: current date");
+            log.warn("Enrollment date cannot be null. Setting default: current date");
             return LocalDate.now();
         }
         return date;
@@ -23,7 +23,7 @@ public class EnrollmentValidator {
 
     public Integer validateId(Integer id) {
         if (id == null) {
-            log.error("Enrollment ID cannot be null. Setting default: {}", Constants.DEFAULT_ENROLLMENT_ID);
+            log.warn("Enrollment ID cannot be null. Setting default: {}", Constants.DEFAULT_ENROLLMENT_ID);
             return Constants.DEFAULT_ENROLLMENT_ID;
         }
         return id;
@@ -31,11 +31,11 @@ public class EnrollmentValidator {
 
     public Integer validateStudentId(Integer studentId) {
         if (studentId == null) {
-            log.error("Enrollment studentId cannot be null. Setting default: {}", Constants.DEFAULT_STUDENT_ID);
+            log.warn("Enrollment studentId cannot be null. Setting default: {}", Constants.DEFAULT_STUDENT_ID);
             return Constants.DEFAULT_STUDENT_ID;
         }
         if (studentId < 0) {
-            log.error("Enrollment studentId cannot be negative ({}). Setting default: {}", studentId, Constants.DEFAULT_STUDENT_ID);
+            log.warn("Enrollment studentId cannot be negative ({}). Setting default: {}", studentId, Constants.DEFAULT_STUDENT_ID);
             return Constants.DEFAULT_STUDENT_ID;
         }
         return studentId;
@@ -43,11 +43,11 @@ public class EnrollmentValidator {
 
     public Integer validateModuleId(Integer moduleId) {
         if (moduleId == null) {
-            log.error("Enrollment moduleId cannot be null. Setting default: {}", Constants.DEFAULT_MODULE_ID);
+            log.warn("Enrollment moduleId cannot be null. Setting default: {}", Constants.DEFAULT_MODULE_ID);
             return Constants.DEFAULT_MODULE_ID;
         }
         if (moduleId < 0) {
-            log.error("Enrollment moduleId cannot be negative ({}). Setting default: {}", moduleId, Constants.DEFAULT_MODULE_ID);
+            log.warn("Enrollment moduleId cannot be negative ({}). Setting default: {}", moduleId, Constants.DEFAULT_MODULE_ID);
             return Constants.DEFAULT_MODULE_ID;
         }
         return moduleId;
