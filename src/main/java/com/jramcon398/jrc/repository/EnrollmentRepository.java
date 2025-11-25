@@ -119,6 +119,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      *
      * @param studentId of the student
      * @param moduleId  of the module
+     * @return boolean indicating success
      *
      */
 
@@ -140,7 +141,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     }
 
     /**
-     * Not applicable for Enrollment. Use deleteByBothKeys instead.
+     * Not applicable for Enrollment. Use delete (student_id, module_id) instead.
      *
      * @param id of the enrollment to delete
      * @return boolean indicating success

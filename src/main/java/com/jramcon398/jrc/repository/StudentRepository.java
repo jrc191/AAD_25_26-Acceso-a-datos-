@@ -152,7 +152,7 @@ public class StudentRepository implements CrudRepository<Student> {
      * Deletes a student by ID
      *
      * @param id of the student to delete
-     * @return true if deleted, false otherwiseº
+     * @return true if deleted, false otherwise
      */
     @Override
     public boolean delete(Integer id) {
