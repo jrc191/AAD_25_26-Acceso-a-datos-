@@ -4,6 +4,7 @@ import com.jramcon398.jrc.models.Enrollment;
 import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
@@ -28,19 +29,26 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
     @Override
     public Enrollment insert(Enrollment enrollment) {
-        int rowsAffected = jdbcTemplate.update(
-                SQLQueries.Module_Queries.INSERT,
-                enrollment.getStudentId(),
-                enrollment.getModuleId(),
-                enrollment.getDate()
-        );
+        try {
+            int rowsAffected = jdbcTemplate.update(
+                    SQLQueries.EnrollmentQueries.INSERT,
+                    enrollment.getStudentId(),
+                    enrollment.getModuleId(),
+                    enrollment.getDate()
+            );
 
-        if (rowsAffected > 0) {
-            log.info("Enrollment created: {} (rows affected: {})", enrollment, rowsAffected);
-            return enrollment;
-        } else {
-            log.error("Failed to create enrollment: {}", enrollment);
+            if (rowsAffected > 0) {
+                log.info("Enrollment created: {} (rows affected: {})", enrollment, rowsAffected);
+                return enrollment;
+            } else {
+                log.error("Failed to create enrollment: {}", enrollment);
+                return null;
+            }
+        } catch (DataIntegrityViolationException ex) {
+
+            log.error("Error inserting enrollment: {}", ex.getMostSpecificCause().getMessage());
             return null;
+
         }
     }
 
@@ -114,7 +122,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      *
      */
 
-    public Boolean deleteByBothKeys(int studentId, int moduleId) {
+    public Boolean delete(int studentId, int moduleId) {
         int rowsAffected = jdbcTemplate.update(
                 SQLQueries.EnrollmentQueries.DELETE_BY_BOTH_KEYS,
                 studentId,
@@ -139,7 +147,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      */
     @Override
     public boolean delete(Integer id) {
-        throw new UnsupportedOperationException("Use deleteByBothKeys to delete enrollment by student ID and module ID");
+        throw new UnsupportedOperationException("Use delete(student_id, module_id) to delete enrollment by student ID and module ID");
     }
 
     /**
@@ -155,7 +163,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
         }
 
         MapSqlParameterSource in = new MapSqlParameterSource()
-                .addValue("student_id", studentId);
+                .addValue("p_id_alumno", studentId);
 
         Integer result = countEnrollmentsFn.executeFunction(Integer.class, in);
         int count = (result == null ? 0 : result); // Handle null case

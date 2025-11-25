@@ -11,7 +11,7 @@ spring:
       schema-locations:
         - classpath:sql/ddl/01_schema.sql
       data-locations:
-        - classpath:02_procedures.sql
-        - classpath:03_sample_data.sql
+        - classpath:sql/ddl/02_procedures.sql
+        - classpath:sql/dml/03_sample_data.sql
       platform: postgresql
       separator: "@@"

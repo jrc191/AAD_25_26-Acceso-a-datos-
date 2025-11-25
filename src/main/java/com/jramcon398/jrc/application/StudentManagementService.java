@@ -12,16 +12,16 @@ import com.jramcon398.jrc.utils.StudentValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
 import java.time.LocalDate;
 
 @Service
+@Transactional
 @AllArgsConstructor
 @Slf4j
 public class StudentManagementService implements CustomService<Student> {
 
-    private final PostgresqlDriver postgresqlDriver;
     private final StudentRepository studentRepository;
     private final ModuleRepository moduleRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -80,14 +80,14 @@ public class StudentManagementService implements CustomService<Student> {
         validatedModule.setName(ModuleValidator.validateName(module.getName()));
         validatedModule.setHours(ModuleValidator.validateHours(module.getHours()));
 
-        // Check if module with same code already exists
+        // Check if module with same code already exists. If so, return it
         Module existingModule = moduleRepository.findByCode(validatedModule.getCode());
         if (existingModule != null) {
             log.warn("Module with code {} already exists, returning existing module", validatedModule.getCode());
             return existingModule;
         }
 
-        // Insert the new module
+        // if not, insert new module
         Module createdModule = moduleRepository.insert(validatedModule);
         log.info("Module created successfully: {}", createdModule);
         return createdModule;
@@ -142,53 +142,42 @@ public class StudentManagementService implements CustomService<Student> {
      * @return Created Enrollment record linking student and module
      */
     @Override
+    @Transactional
     public Enrollment enrollStudentInModule(Integer studentId, Integer moduleId) {
-        try {
-            postgresqlDriver.beginTransaction();
-            Connection conn = postgresqlDriver.getConnection();
 
-            // Validations
-            Integer validatedStudentId = EnrollmentValidator.validateStudentId(studentId);
-            Integer validatedModuleId = EnrollmentValidator.validateModuleId(moduleId);
+        // Validations
+        Integer validatedStudentId = EnrollmentValidator.validateStudentId(studentId);
+        Integer validatedModuleId = EnrollmentValidator.validateModuleId(moduleId);
 
-            // Check existence of student, so we can enroll
-            var student = studentRepository.findById(validatedStudentId, conn);
-            if (student == null) {
-                log.error("Cannot find student with id: {}", validatedStudentId);
-                postgresqlDriver.rollback();
-                return null;
-            }
-
-            // Check if module exists, so we can enroll
-            var module = moduleRepository.findById(validatedModuleId, conn);
-            if (module == null) {
-                log.error("Module not found: {}", validatedModuleId);
-                postgresqlDriver.rollback();
-                return null;
-            }
-
-            // Create enrollment with validated date
-            LocalDate enrollmentDate = EnrollmentValidator.validateDate(LocalDate.now());
-            Enrollment enrollment = new Enrollment(enrollmentDate, student.getId(), module.getId());
-
-            Enrollment created = enrollmentRepository.insert(enrollment, conn);
-            postgresqlDriver.commit(); // Commit transaction
-            log.info("Successfully enrolled student {} in module {}", validatedStudentId, validatedModuleId);
-            return created;
-        } catch (Exception e) {
-            postgresqlDriver.rollback();
-            log.error("Error enrolling student {} in module {}: {}", studentId, moduleId, e.getMessage());
-            return null;
+        // Check existence of student, so we can enroll
+        var student = studentRepository.findById(validatedStudentId);
+        if (student == null) {
+            log.error("Cannot find student with id: {}", validatedStudentId);
+            throw new RuntimeException("Student not found with id: " + validatedStudentId);
         }
+
+        // Check if module exists, so we can enroll
+        var module = moduleRepository.findById(validatedModuleId);
+        if (module == null) {
+            log.error("Module not found: {}", validatedModuleId);
+            throw new RuntimeException("Module not found with id: " + validatedModuleId);
+        }
+
+        // Create enrollment with validated date
+        LocalDate enrollmentDate = EnrollmentValidator.validateDate(LocalDate.now());
+        Enrollment enrollment = new Enrollment(enrollmentDate, student.getId(), module.getId());
+
+        Enrollment created = enrollmentRepository.insert(enrollment);
+        log.info("Successfully enrolled student {} in module {}", validatedStudentId, validatedModuleId);
+        return created;
     }
 
     /**
      * Gets the number of enrollments for a given student.
      *
-     * @param studentId ID of the student
-     * @return Number of enrollments for the student
+     * @param studentId ID of the student to get enrollment count for
      */
-    public int getEnrollmentCount(Integer studentId) {
+    public void getEnrollmentCount(Integer studentId) {
         log.info("Getting enrollment count for student {}", studentId);
 
         if (studentId == null) {
@@ -198,6 +187,5 @@ public class StudentManagementService implements CustomService<Student> {
         int count = enrollmentRepository.countEnrollments(studentId);
         log.info("Student {} has {} enrollments", studentId, count);
 
-        return count;
     }
 }
