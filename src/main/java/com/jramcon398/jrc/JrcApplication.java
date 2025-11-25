@@ -29,8 +29,10 @@ public class JrcApplication implements CommandLineRunner {
         miriam = studentManagementService.createStudent(miriam);
         programacion = studentManagementService.createModule(programacion);
         studentManagementService.enrollStudentInModule(miriam.getId(), programacion.getId());
+        //Should use StudentManagementService to delete student and not StudentRepository directly
+        //studentManagementService.deleteStudent(miriam.getId());
         studentRepository.delete(miriam.getId());
-        studentManagementService.getEnrollmentCount(miriam.getId());
+        studentManagementService.getEnrollmentCount(76);
 
     }
 }

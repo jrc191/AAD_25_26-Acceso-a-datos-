@@ -158,14 +158,14 @@ public class StudentManagementService implements CustomService<Student> {
         var student = studentRepository.findById(validatedStudentId);
         if (student == null) {
             log.error("Cannot find student with id: {}", validatedStudentId);
-            throw new RuntimeException("Student not found with id: " + validatedStudentId);
+            return null;
         }
 
         // Check if module exists, so we can enroll
         var module = moduleRepository.findById(validatedModuleId);
         if (module == null) {
             log.error("Module not found: {}", validatedModuleId);
-            throw new RuntimeException("Module not found with id: " + validatedModuleId);
+            return null;
         }
 
         // Create enrollment with validated date
@@ -186,11 +186,44 @@ public class StudentManagementService implements CustomService<Student> {
         log.info("Getting enrollment count for student {}", studentId);
 
         if (studentId == null) {
-            throw new IllegalArgumentException("Student ID cannot be null");
+            log.error("Student ID cannot be null");
+            return;
         }
 
+        Student student = studentRepository.findById(studentId);
+        if (student == null) {
+            log.warn("Student {} does not exist. Enrollment count aborted.", studentId);
+            return;
+        }
+        
         int count = enrollmentRepository.countEnrollments(studentId);
         log.info("Student {} has {} enrollments", studentId, count);
 
+    }
+
+    /**
+     * Deletes a student by ID.
+     * If the student does not exist, logs a warning.
+     *
+     * @param studentId ID of the student to delete
+     * @return boolean indicating if deletion was successful
+     */
+
+    @Transactional
+    public boolean deleteStudent(Integer studentId) {
+        if (studentId == null) {
+            log.error("Student ID cannot be null");
+            return false;
+        }
+
+        log.info("Deleting student id={} ", studentId);
+
+        boolean success = studentRepository.delete(studentId);
+        if (success) {
+            log.info("Student {} deleted successfully", studentId);
+        } else {
+            log.warn("No student found with id: {}", studentId);
+        }
+        return success;
     }
 }
