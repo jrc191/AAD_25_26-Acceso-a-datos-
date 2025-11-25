@@ -4,10 +4,11 @@ import com.jramcon398.jrc.models.Enrollment;
 import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -15,49 +16,31 @@ import java.util.List;
 @Slf4j
 public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
-    private final PostgresqlDriver postgresqlDriver;
+    private final JdbcTemplate jdbcTemplate;
+    private SimpleJdbcCall countEnrollmentsFn;
 
     /**
      * Inserts enrollment using provided connection (for transactions)
      *
      * @param enrollment to insert
-     * @param conn       active connection
      * @return Enrollment inserted
      */
 
-    public Enrollment insert(Enrollment enrollment, Connection conn) {
-        String sql = SQLQueries.EnrollmentQueries.INSERT;
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, enrollment.getStudentId());
-            ps.setInt(2, enrollment.getModuleId());
-            ps.setDate(3, Date.valueOf(enrollment.getDate()));
-
-            int rowsAffected = ps.executeUpdate();
-            log.info("Enrollment created: {} (rows affected: {})", enrollment, rowsAffected);
-            return enrollment;
-
-        } catch (SQLException e) {
-            String sqlState = e.getSQLState();
-            // SQL State 23505 indicates a unique constraint violation (duplicate key)
-            if ("23505".equals(sqlState)) {
-                log.warn("Enrollment already exists for student {} and module {} (constraint violation, duplicated key)", enrollment.getStudentId(), enrollment.getModuleId());
-                return null;
-            }
-            log.error("Error inserting enrollment: {}", e.getMessage());
-            return null;
-        }
-    }
-
-    // No transaction version
     @Override
     public Enrollment insert(Enrollment enrollment) {
-        try (Connection conn = postgresqlDriver.getConnection()) {
-            return insert(enrollment, conn);
-        } catch (SQLException e) {
-            log.error("Error getting connection: {}", e.getMessage());
-            throw new RuntimeException("Error creating enrollment", e);
+        int rowsAffected = jdbcTemplate.update(
+                SQLQueries.Module_Queries.INSERT,
+                enrollment.getStudentId(),
+                enrollment.getModuleId(),
+                enrollment.getDate()
+        );
+
+        if (rowsAffected > 0) {
+            log.info("Enrollment created: {} (rows affected: {})", enrollment, rowsAffected);
+            return enrollment;
+        } else {
+            log.error("Failed to create enrollment: {}", enrollment);
+            return null;
         }
     }
 
@@ -69,26 +52,14 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
     @Override
     public List<Enrollment> findAll() {
-        String sql = SQLQueries.EnrollmentQueries.FIND_ALL;
-        List<Enrollment> enrollments = new ArrayList<>();
-
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Enrollment enrollment = mapRow(rs);
-                enrollments.add(enrollment);
-            }
-
-            log.info("Found {} enrollments", enrollments.size());
-
-        } catch (SQLException e) {
-            log.error("Error finding all enrollments: {}", e.getMessage());
-            throw new RuntimeException("Error finding all enrollments", e);
-        }
-
-        return enrollments;
+        return jdbcTemplate.query(
+                SQLQueries.EnrollmentQueries.FIND_ALL,
+                (rs, rowNum) -> new Enrollment(
+                        rs.getDate("fecha").toLocalDate(),
+                        rs.getInt("id_alumno"),
+                        rs.getInt("id_modulo")
+                )
+        );
     }
 
     /**
@@ -98,36 +69,23 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @return List<Enrollment>
      */
 
-    public List<Enrollment> findByStudent(int studentId) {
-        String sql = SQLQueries.EnrollmentQueries.FIND_BY_STUDENT;
-        List<Enrollment> enrollments = new ArrayList<>();
-
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, studentId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Enrollment enrollment = mapRow(rs);
-                enrollments.add(enrollment);
-            }
-
-            log.info("Found {} enrollments for student {}", enrollments.size(), studentId);
-
-        } catch (SQLException e) {
-            log.error("Error finding enrollments for student {}: {}", studentId, e.getMessage());
-            throw new RuntimeException("Error finding enrollments for student", e);
-        }
-
-        return enrollments;
+    public List<Enrollment> findByStudentId(Integer studentId) {
+        return jdbcTemplate.query(
+                SQLQueries.EnrollmentQueries.FIND_BY_STUDENT,
+                (rs, rowNum) -> new Enrollment(
+                        rs.getDate("fecha").toLocalDate(),
+                        rs.getInt("id_alumno"),
+                        rs.getInt("id_modulo")
+                ),
+                studentId
+        );
     }
 
     /**
      * Not applicable for Enrollment. Use findByStudent instead.
      *
      * @param id of the enrollment
-     * @return
+     * @return Exception
      */
 
     @Override
@@ -156,21 +114,20 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      *
      */
 
-    public void deleteByBothKeys(int studentId, int moduleId) {
-        String sql = SQLQueries.EnrollmentQueries.DELETE_BY_BOTH_KEYS;
+    public Boolean deleteByBothKeys(int studentId, int moduleId) {
+        int rowsAffected = jdbcTemplate.update(
+                SQLQueries.EnrollmentQueries.DELETE_BY_BOTH_KEYS,
+                studentId,
+                moduleId
+        );
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, studentId);
-            ps.setInt(2, moduleId);
-            int rowsAffected = ps.executeUpdate();
+        if (rowsAffected > 0) {
             log.info("Enrollment deleted: studentId={}, moduleId={} (rows affected: {})",
                     studentId, moduleId, rowsAffected);
-
-        } catch (SQLException e) {
-            log.error("Error deleting enrollment: {}", e.getMessage());
-            throw new RuntimeException("Error deleting enrollment", e);
+            return true;
+        } else {
+            log.warn("No enrollment found for studentId={}, moduleId={}", studentId, moduleId);
+            return false;
         }
     }
 
@@ -192,28 +149,20 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
      * @return total enrollments
      */
     public int countEnrollments(int studentId) {
-        String sql = SQLQueries.EnrollmentQueries.COUNT_ENROLLMENTS;
-
-        try (Connection con = postgresqlDriver.getConnection();
-             CallableStatement cs = con.prepareCall(sql)) {
-            cs.registerOutParameter(1, Types.INTEGER);
-            cs.setInt(2, studentId);
-            cs.execute();
-            int total = cs.getInt(1);
-            log.info("Total enrollments: {} ", total);
-            return total;
-        } catch (SQLException e) {
-            log.error("Error counting enrollments for student {}: {}", studentId, e.getMessage());
-            throw new RuntimeException("Error counting enrollments", e);
+        if (countEnrollmentsFn == null) {
+            countEnrollmentsFn = new SimpleJdbcCall(jdbcTemplate)
+                    .withFunctionName("count_enrollments");
         }
 
+        MapSqlParameterSource in = new MapSqlParameterSource()
+                .addValue("student_id", studentId);
+
+        Integer result = countEnrollmentsFn.executeFunction(Integer.class, in);
+        int count = (result == null ? 0 : result); // Handle null case
+
+        log.info("Total enrollments: {}", count);
+        return count;
+
     }
 
-    private Enrollment mapRow(ResultSet rs) throws SQLException {
-        Enrollment enrollment = new Enrollment();
-        enrollment.setStudentId(rs.getInt("id_alumno"));
-        enrollment.setModuleId(rs.getInt("id_modulo"));
-        enrollment.setDate(rs.getDate("fecha").toLocalDate());
-        return enrollment;
-    }
 }
