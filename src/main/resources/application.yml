@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/prueba
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+
+  sql:
+    init:
+      mode: always
+      schema-locations:
+        - classpath:sql/ddl/01_schema.sql
+      data-locations:
+        - classpath:02_procedures.sql
+        - classpath:03_sample_data.sql
+      platform: postgresql
+      separator: "@@"
