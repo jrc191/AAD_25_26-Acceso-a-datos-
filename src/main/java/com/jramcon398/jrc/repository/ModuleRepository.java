@@ -13,6 +13,11 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.util.List;
 
+/**
+ * ModuleRepository class: Handles CRUD operations for Module entities.
+ * Uses JdbcTemplate for database interactions.
+ */
+
 @Repository
 @RequiredArgsConstructor
 @Slf4j

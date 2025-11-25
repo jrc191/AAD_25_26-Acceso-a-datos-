@@ -16,6 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
+/**
+ * StudentManagementService class: Handles business logic for managing students, modules, and enrollments.
+ * Uses repositories for database interactions and validators for data validation.
+ */
+
 @Service
 @Transactional
 @AllArgsConstructor

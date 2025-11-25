@@ -13,6 +13,11 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.util.List;
 
+/**
+ * StudentRepository class: Handles CRUD operations for Student entities.
+ * Uses JdbcTemplate for database interactions.
+ */
+
 @Repository
 @RequiredArgsConstructor
 @Slf4j

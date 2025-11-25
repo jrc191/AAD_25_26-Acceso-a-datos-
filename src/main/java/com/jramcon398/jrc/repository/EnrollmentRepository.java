@@ -12,6 +12,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * EnrollmentRepository class: Handles CRUD operations for Enrollment entities.
+ * Uses JdbcTemplate for database interactions.
+ */
+
 @Repository
 @RequiredArgsConstructor
 @Slf4j
@@ -21,7 +26,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     private SimpleJdbcCall countEnrollmentsFn;
 
     /**
-     * Inserts enrollment using provided connection (for transactions)
+     * Inserts enrollment using student ID and module ID.
      *
      * @param enrollment to insert
      * @return Enrollment inserted
@@ -98,7 +103,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
 
     @Override
     public Enrollment findById(Integer id) {
-        throw new UnsupportedOperationException("Use findByStudent to find enrollments by student ID");
+        throw new UnsupportedOperationException("Use findByStudent to find all enrollments by student ID");
     }
 
     /**
@@ -141,7 +146,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
     }
 
     /**
-     * Not applicable for Enrollment. Use delete (student_id, module_id) instead.
+     * Not applicable for Enrollment. Use delete(studentId, moduleId) instead.
      *
      * @param id of the enrollment to delete
      * @return boolean indicating success
@@ -167,7 +172,7 @@ public class EnrollmentRepository implements CrudRepository<Enrollment> {
                 .addValue("p_id_alumno", studentId);
 
         Integer result = countEnrollmentsFn.executeFunction(Integer.class, in);
-        int count = (result == null ? 0 : result); // Handle null case
+        int count = (result == null ? 0 : result); // Handle null cases
 
         log.info("Total enrollments: {}", count);
         return count;
