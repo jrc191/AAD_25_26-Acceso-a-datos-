@@ -4,9 +4,12 @@ import com.jramcon398.jrc.models.Student;
 import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class StudentRepository implements CrudRepository<Student> {
 
-    private final PostgresqlDriver postgresqlDriver;
+    private final JdbcTemplate jdbcTemplate;
 
     /**
      * Inserts student in the database
@@ -28,35 +31,24 @@ public class StudentRepository implements CrudRepository<Student> {
      */
     @Override
     public Student insert(Student student) {
-        String sql = SQLQueries.Student_Queries.INSERT;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    SQLQueries.Student_Queries.INSERT,
+                    new String[]{"id_alumno"}
+            );
             ps.setString(1, student.getNif());
             ps.setString(2, student.getName());
             ps.setString(3, student.getEmail());
+            return ps;
+        }, keyHolder);
 
-            log.debug("Executing insert for student: {}", student);
+        Integer generatedId = keyHolder.getKey().intValue();
+        student.setId(generatedId);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int generatedId = rs.getInt("id_alumno");
-                    student.setId(generatedId);
-                    log.info("Successfully added student with ID {}: {}", generatedId, student);
-                    return student;
-                } else {
-                    log.error("No result set returned from INSERT");
-                }
-            }
-
-            log.error("Failed to insert student, no ID generated");
-            return null;
-
-        } catch (SQLException e) {
-            log.error("Error inserting student: {}", e.getMessage());
-            throw new RuntimeException("Error inserting student", e);
-        }
+        log.info("Successfully added student with ID {}: {}", generatedId, student);
+        return student;
     }
 
     /**
@@ -67,67 +59,42 @@ public class StudentRepository implements CrudRepository<Student> {
 
     @Override
     public List<Student> findAll() {
-        String sql = SQLQueries.Student_Queries.FIND_ALL;
-        List<Student> students = new ArrayList<>();
-
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Student student = mapRow(rs);
-                students.add(student);
-            }
-
-            log.info("Found {} students", students.size());
-
-        } catch (SQLException e) {
-            log.error("Error finding all students: {}", e.getMessage());
-            throw new RuntimeException("Error finding all students", e);
-        }
-
-        return students;
+        return jdbcTemplate.query(
+                SQLQueries.Student_Queries.FIND_ALL,
+                (rs, rowNum) -> new Student(
+                        rs.getInt("id_alumno"),
+                        rs.getString("nif"),
+                        rs.getString("nombre"),
+                        rs.getString("email"),
+                        null // course is not retrieved in this query
+                )
+        );
     }
 
     /**
      * Finds a student by ID using provided connection (for transactions)
      *
-     * @param id   of the student to find
-     * @param conn Connection to use
+     * @param id of the student to find
      * @return Student found or null if not found
      */
-    public Student findById(Integer id, Connection conn) {
-        String sql = SQLQueries.Student_Queries.FIND_BY_ID;
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Student student = mapRow(rs);
-                    log.info("Found student: {}", student);
-                    return student;
-                }
-
-                log.warn("Student not found with id: {}", id);
-                return null;
-            }
-
-        } catch (SQLException e) {
-            log.error("Error finding student by id {}: {}", id, e.getMessage());
-            throw new RuntimeException("Error finding student by id", e);
-        }
-    }
-
-    //No transaction version
-    @Override
     public Student findById(Integer id) {
-        try (Connection conn = postgresqlDriver.getConnection()) {
-            return findById(id, conn);
-        } catch (SQLException e) {
-            log.error("Error getting connection: {}", e.getMessage());
-            throw new RuntimeException("Error finding student", e);
+        try {
+            Student student = jdbcTemplate.queryForObject(
+                    SQLQueries.Student_Queries.FIND_BY_ID,
+                    (rs, rowNum) -> new Student(
+                            rs.getInt("id_alumno"),
+                            rs.getString("nif"),
+                            rs.getString("nombre"),
+                            rs.getString("email"),
+                            null
+                    ),
+                    id
+            );
+            log.info("Found student: {}", student);
+            return student;
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("Student not found with id: {}", id);
+            return null;
         }
     }
 
@@ -139,27 +106,23 @@ public class StudentRepository implements CrudRepository<Student> {
      */
 
     public Student findByNif(String nif) {
-        String sql = SQLQueries.Student_Queries.FIND_BY_NIF;
-
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, nif);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Student student = mapRow(rs);
-                    log.warn("Found student by NIF: {}", student);
-                    return student;
-                }
-
-                log.info("Student not found with NIF: {}", nif);
-                return null;
-            }
-
-        } catch (SQLException e) {
-            log.error("Error finding student by NIF {}: {}", nif, e.getMessage());
-            throw new RuntimeException("Error finding student by NIF", e);
+        try {
+            Student student = jdbcTemplate.queryForObject(
+                    SQLQueries.Student_Queries.FIND_BY_NIF,
+                    (rs, rowNum) -> new Student(
+                            rs.getInt("id_alumno"),
+                            rs.getString("nif"),
+                            rs.getString("nombre"),
+                            rs.getString("email"),
+                            null
+                    ),
+                    nif
+            );
+            log.info("Found student with NIF {}: {}", nif, student);
+            return student;
+        } catch (EmptyResultDataAccessException e) {
+            log.info("Student not found with NIF: {}", nif);
+            return null;
         }
     }
 
@@ -171,23 +134,20 @@ public class StudentRepository implements CrudRepository<Student> {
      */
     @Override
     public Student update(Student student) {
-        String sql = SQLQueries.Student_Queries.UPDATE;
+        int rowsAffected = jdbcTemplate.update(
+                SQLQueries.Student_Queries.UPDATE,
+                student.getNif(),
+                student.getName(),
+                student.getEmail(),
+                student.getId()
+        );
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, student.getNif());
-            ps.setString(2, student.getName());
-            ps.setString(3, student.getEmail());
-            ps.setInt(4, student.getId());
-
-            int rowsAffected = ps.executeUpdate();
+        if (rowsAffected > 0) {
             log.info("Student updated: {} (rows affected: {})", student, rowsAffected);
             return student;
-
-        } catch (SQLException e) {
-            log.error("Error updating student {}: {}", student.getId(), e.getMessage());
-            throw new RuntimeException("Error updating student", e);
+        } else {
+            log.warn("No student found with id: {}", student.getId());
+            return null;
         }
     }
 
@@ -199,20 +159,17 @@ public class StudentRepository implements CrudRepository<Student> {
      */
     @Override
     public boolean delete(Integer id) {
-        String sql = SQLQueries.Student_Queries.DELETE;
+        int rowsAffected = jdbcTemplate.update(
+                SQLQueries.Student_Queries.DELETE,
+                id
+        );
 
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-            int rowsAffected = ps.executeUpdate();
+        if (rowsAffected > 0) {
             log.info("Student deleted: id={} (rows affected: {})", id, rowsAffected);
-
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            log.error("Error deleting student {}: {}", id, e.getMessage());
-            throw new RuntimeException("Error deleting student", e);
+            return true;
+        } else {
+            log.warn("No student found with id: {}", id);
+            return false;
         }
     }
 
