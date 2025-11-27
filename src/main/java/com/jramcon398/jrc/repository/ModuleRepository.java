@@ -1,6 +1,7 @@
 package com.jramcon398.jrc.repository;
 
 import com.jramcon398.jrc.models.Module;
+import com.jramcon398.jrc.utils.Constants;
 import com.jramcon398.jrc.utils.SQLQueries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * ModuleRepository class: Handles CRUD operations for Module entities.
@@ -46,7 +48,7 @@ public class ModuleRepository implements CrudRepository<Module> {
             return ps;
         }, keyHolder);
 
-        Integer generatedId = keyHolder.getKey().intValue();
+        Integer generatedId = Objects.requireNonNull(keyHolder.getKey()).intValue();
         module.setId(generatedId);
 
         log.info("Successfully added module with ID {}: {}", generatedId, module);
@@ -91,7 +93,7 @@ public class ModuleRepository implements CrudRepository<Module> {
             log.info("Found module: {}", module);
             return module;
         } catch (EmptyResultDataAccessException e) {
-            log.warn("Module not found with id: {}", id);
+            log.warn(Constants.MODULE_NOT_FOUND, id);
             return null;
         }
     }
@@ -143,7 +145,7 @@ public class ModuleRepository implements CrudRepository<Module> {
             log.info("Module updated: {} (rows affected: {})", module, rowsAffected);
             return module;
         } else {
-            log.warn("No module found with id: {}", module.getId());
+            log.warn(Constants.MODULE_NOT_FOUND, module.getId());
             return null;
         }
     }
@@ -165,7 +167,7 @@ public class ModuleRepository implements CrudRepository<Module> {
             log.info("Module deleted: id={} (rows affected: {})", id, rowsAffected);
             return true;
         } else {
-            log.warn("No module found with id: {}", id);
+            log.warn(Constants.MODULE_NOT_FOUND, id);
             return false;
         }
     }

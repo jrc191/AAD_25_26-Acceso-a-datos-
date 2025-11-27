@@ -20,6 +20,7 @@ public class Constants {
     public static final String DEFAULT_MODULE_CODE = "NO-CODE";
     public static final String DEFAULT_MODULE_NAME = "NO-NAME";
     public static final Integer DEFAULT_MODULE_HOURS = 0;
+    public static final String MODULE_NOT_FOUND = "Module not found with id: {}";
 
 
 }
