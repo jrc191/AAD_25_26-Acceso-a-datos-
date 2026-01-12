@@ -14,6 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Service class for managing enrollments.
+ * Includes methods for enrolling students, handling transactions,
+ * and retrieving enrollments based on final grades.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class EnrollmentService {

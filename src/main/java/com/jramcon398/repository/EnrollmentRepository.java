@@ -8,6 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository with some other custom queries for Enrollment entity.
+ */
+
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 

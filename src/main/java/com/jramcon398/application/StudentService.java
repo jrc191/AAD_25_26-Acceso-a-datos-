@@ -9,6 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Service class for managing students.
+ * Includes methods for retrieving, registering, deleting,
+ * and searching students by email.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class StudentService {

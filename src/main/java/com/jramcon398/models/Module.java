@@ -10,6 +10,10 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a module/course in the system.
+ */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

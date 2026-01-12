@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * Test runner to execute JPA tests on application startup.
+ */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor

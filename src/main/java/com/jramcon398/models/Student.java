@@ -10,6 +10,10 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a student in the system.
+ */
+
 @Data
 @NoArgsConstructor
 @Entity

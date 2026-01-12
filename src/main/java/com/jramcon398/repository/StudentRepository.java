@@ -8,6 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository with a custom query for Student entity.
+ */
+
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByName(String name);
