@@ -14,19 +14,17 @@ y `JdbcTemplate` por un enfoque orientado a objetos utilizando **Spring Data JPA
   `JpaRepository`.
 - **Limpieza de código:** Se han eliminado las clases de utilidades manuales (`SQLQueries`, validadores manuales,
   constantes) en favor de las funcionalidades del framework.
-- **API REST:** Se ha añadido una capa de controladores (`@RestController`) para exponer la funcionalidad vía web (
-  JSON).
 
 ## 2. Ventajas de usar JPA y Hibernate (vs JdbcTemplate)
 
 - **Adiós al SQL manual:** Las operaciones CRUD básicas (`save`, `findAll`, `delete`) se generan
-  automáticamente, eliminando la necesidad de escribir sentencias SQL repetitivas[cite: 46].
+  automáticamente, eliminando la necesidad de escribir sentencias SQL repetitivas.
 - **Mapeo Automático (ORM):** Hibernate se encarga de transformar automáticamente los registros de la base
   de datos en objetos Java y viceversa.
 - **Validación Estándar:** Se utilizan anotaciones de `Jakarta Validation` (`@NotBlank`, `@Email`,
-  `@NotNull`) directamente en las entidades para asegurar la integridad de los datos[cite: 708].
+  `@NotNull`) directamente en las entidades para asegurar la integridad de los datos.
 - **Gestión de Relaciones:** Las claves foráneas se gestionan como relaciones entre objetos Java (
-  `List<Enrollment>`, `Student student`), simplificando la navegación entre datos[cite: 245].
+  `List<Enrollment>`, `Student student`), simplificando la navegación entre datos.
 
 ## 3. Gestión de Transacciones y Persistencia
 
