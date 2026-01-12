@@ -1,23 +1,53 @@
 # AAD_25_26-Acceso-a-datos-
 
-## PRÁCTICA 2_2: Gestión de matrículas con Spring Boot, JdbcTemplate y PostgreSQL
+## PRÁCTICA 3_1: Mapeo Objeto-Relacional (ORM) con JPA y Spring Boot
+
+Esta práctica representa la migración de la capa de persistencia de la aplicación: se ha sustituido el uso de SQL manual
+y `JdbcTemplate` por un enfoque orientado a objetos utilizando **Spring Data JPA** e **Hibernate**.
 
 ## 1. Resumen de los cambios realizados
 
-- Se reemplazó por completo el contenido anterior para ajustarse al uso de JdbcTemplate.
-- Se eliminaron referencias a JDBC manual.
-- Se reestructuró el documento para mayor claridad.
-- Se añadieron secciones relacionadas con transacciones declarativas.
+- **Migración a JPA:** Se ha reemplazado `spring-boot-starter-jdbc` por `spring-boot-starter-data-jpa` en el `pom.xml`.
+- **Entidades:** Las clases del modelo (`Student`, `Module`, `Enrollment`) se han convertido en entidades JPA mediante
+  anotaciones (`@Entity`, `@Table`, `@Id`, `@OneToMany`, etc.).
+- **Repositorios:** Se han eliminado los DAO manuales y los `RowMapper`. Ahora se utilizan interfaces que extienden de
+  `JpaRepository`.
+- **Limpieza de código:** Se han eliminado las clases de utilidades manuales (`SQLQueries`, validadores manuales,
+  constantes) en favor de las funcionalidades del framework.
+- **API REST:** Se ha añadido una capa de controladores (`@RestController`) para exponer la funcionalidad vía web (
+  JSON).
 
-## 2. Ventajas de usar JdbcTemplate y DataSource
+## 2. Ventajas de usar JPA y Hibernate (vs JdbcTemplate)
 
-- Las operaciones CRUD se han implementado mediante JdbcTemplate, reduciendo código repetitivo.
-- La gestión de transacciones se realiza mediante @Transactional, sin necesidad de commit ni rollback manuales.
-- La gestión de conexiones se realiza automáticamente gracias a DataSource.
-- El uso de consultas parametrizadas aporta seguridad frente a inyecciones.
+- **Adiós al SQL manual:** Las operaciones CRUD básicas (`save`, `findAll`, `delete`) se generan
+  automáticamente, eliminando la necesidad de escribir sentencias SQL repetitivas[cite: 46].
+- **Mapeo Automático (ORM):** Hibernate se encarga de transformar automáticamente los registros de la base
+  de datos en objetos Java y viceversa.
+- **Validación Estándar:** Se utilizan anotaciones de `Jakarta Validation` (`@NotBlank`, `@Email`,
+  `@NotNull`) directamente en las entidades para asegurar la integridad de los datos[cite: 708].
+- **Gestión de Relaciones:** Las claves foráneas se gestionan como relaciones entre objetos Java (
+  `List<Enrollment>`, `Student student`), simplificando la navegación entre datos[cite: 245].
 
-## 3. Manejo de transacciones declarativas en Spring Boot
+## 3. Gestión de Transacciones y Persistencia
 
-- Las transacciones se gestionan mediante @Transactional.
-- Spring decide automáticamente cuándo abrir, confirmar o revertir la transacción.
-- Si ocurre una excepción, se realiza rollback.
+- **@Transactional:** Se sigue utilizando para delimitar unidades de trabajo atómicas. Si ocurre una
+  excepción (ej. `RuntimeException`), Spring realiza un **rollback** automático, deshaciendo cualquier cambio en la base
+  de datos para mantener la consistencia.
+- **Contexto de Persistencia:** JPA optimiza el rendimiento manteniendo un contexto de persistencia que
+  sincroniza los objetos con la base de datos solo cuando es necesario.
+
+## 4. Consultas Personalizadas
+
+Aunque JPA genera las consultas básicas, se han implementado consultas avanzadas de dos formas:
+
+1. **Métodos derivados:** Como `findByName(String name)` (Spring genera el SQL automáticamente).
+2. **JPQL y @Query:** Consultas personalizadas sobre objetos, por ejemplo:
+   ```java
+   @Query("SELECT e FROM Enrollment e WHERE e.finalGrade >= :grade");
+   ```
+
+## 5. Pruebas y Validación
+
+- Se han adaptado las pruebas unitarias y de integración para trabajar con JPA y los repositorios.
+- Se ha verificado que todas las operaciones CRUD y las consultas personalizadas funcionan correctamente.
+- Todo se realiza en un fichero `TestRunner.java` que incluye pruebas para los repositorios.
