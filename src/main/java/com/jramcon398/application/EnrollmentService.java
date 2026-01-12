@@ -1,6 +1,7 @@
 package com.jramcon398.application;
 
 import com.jramcon398.exceptions.ResourceNotFoundException;
+import com.jramcon398.exceptions.SimulatedException;
 import com.jramcon398.models.Enrollment;
 import com.jramcon398.models.Module;
 import com.jramcon398.models.Student;
@@ -14,12 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Service class for managing enrollments.
- * Includes methods for enrolling students, handling transactions,
- * and retrieving enrollments based on final grades.
- */
-
 @Service
 @RequiredArgsConstructor
 public class EnrollmentService {
@@ -28,16 +23,17 @@ public class EnrollmentService {
     private final StudentRepository studentRepository;
     private final ModuleRepository moduleRepository;
 
-    // Enrollment with transaction management
+    // Default enrollment method
     @Transactional
     public Enrollment enrollStudent(Long studentId, Long moduleId) {
-        // Recover entity or throw exception if not found
+        // Search for Student and Module
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Module not found"));
 
+        // Then we save the Enrollment. First we create it.
         Enrollment enrollment = new Enrollment();
         enrollment.setStudent(student);
         enrollment.setModule(module);
@@ -46,14 +42,31 @@ public class EnrollmentService {
         return enrollmentRepository.save(enrollment);
     }
 
-    // Enrollment with simulated error to test Rollback
+
+    // Simulated error to test Rollback
     @Transactional
     public void enrollStudentWithError(Long studentId, Long moduleId) {
-        this.enrollStudent(studentId, moduleId);
-        throw new RuntimeException("Simulated error to test Rollback");
+
+        // Recover Student and Module
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        Module module = moduleRepository.findById(moduleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Module not found"));
+        
+        Enrollment enrollment = new Enrollment();
+        enrollment.setStudent(student);
+        enrollment.setModule(module);
+        enrollment.setEnrollmentDate(LocalDate.now());
+
+        enrollmentRepository.save(enrollment);
+
+        // Forcing rollback
+        throw new SimulatedException("Simulated error to test Rollback");
+
     }
 
-    // Get enrollments with final grades above a threshold
+    // Custom query: enrollments with final grade >= minGrade
     public List<Enrollment> getEnrollmentsWithHighGrades(Double minGrade) {
         return enrollmentRepository.findByMinFinalGrade(minGrade);
     }
