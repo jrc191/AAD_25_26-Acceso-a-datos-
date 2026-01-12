@@ -15,6 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Service class for managing enrollments.
+ * Includes methods for enrolling students, handling errors,
+ * and retrieving enrollments based on final grades.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class EnrollmentService {
@@ -53,7 +59,7 @@ public class EnrollmentService {
 
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Module not found"));
-        
+
         Enrollment enrollment = new Enrollment();
         enrollment.setStudent(student);
         enrollment.setModule(module);
