@@ -5,13 +5,15 @@ spring:
     password: admin
     driver-class-name: org.postgresql.Driver
 
-  sql:
-    init:
-      mode: always
-      schema-locations:
-        - classpath:sql/ddl/01_schema.sql
-      data-locations:
-        - classpath:sql/ddl/02_procedures.sql
-        - classpath:sql/dml/03_sample_data.sql
-      platform: postgresql
-      separator: "@@"
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
