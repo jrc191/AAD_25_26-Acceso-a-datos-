@@ -21,7 +21,6 @@ public class JrcApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-
-
+        // Application started
     }
 }
