@@ -22,7 +22,7 @@ public class Module {
     private String name;
     private Integer hours;
 
-    @OneToMany(mappedBy = "module")
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Enrollment> enrollments = new ArrayList<>();
 }
