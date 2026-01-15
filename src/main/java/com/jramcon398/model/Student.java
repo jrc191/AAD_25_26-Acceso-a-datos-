@@ -7,6 +7,11 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Represents a student in the academic system.
+ */
+
 @Data
 @Entity
 @Table(name = "students")

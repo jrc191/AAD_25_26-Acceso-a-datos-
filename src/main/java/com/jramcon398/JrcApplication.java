@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "com.jramcon398.repository")
-@EntityScan(basePackages = "com.jramcon398.model") // Matches the package name singular
+@EntityScan(basePackages = "com.jramcon398.model")
 @RequiredArgsConstructor
 public class JrcApplication implements CommandLineRunner {
 

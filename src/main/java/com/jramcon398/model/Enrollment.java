@@ -31,7 +31,7 @@ public class Enrollment {
     private Module module;
 
     @NotNull
-    private LocalDate enrollmentDate = LocalDate.now(); //Default to current date
+    private LocalDate enrollmentDate = LocalDate.now();
 
     private Double finalGrade;
 }

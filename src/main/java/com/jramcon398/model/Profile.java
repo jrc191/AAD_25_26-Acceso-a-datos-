@@ -3,6 +3,10 @@ package com.jramcon398.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+/**
+ * Represents the profile of a student.
+ */
+
 @Data
 @Entity
 @Table(name = "profiles")

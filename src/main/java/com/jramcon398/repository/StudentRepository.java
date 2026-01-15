@@ -12,10 +12,9 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
-    // Required for the 'run' method test (JrcApplication.java)
+    // Optional so we can handle the case where no student is found
     Optional<Student> findByNif(String nif);
-
-    // Required to fix the error in StudentService (Custom Query Practice) [cite: 1008]
+    
     @Query("SELECT s FROM Student s WHERE s.email LIKE %:text%")
     List<Student> searchByEmail(@Param("text") String text);
 }

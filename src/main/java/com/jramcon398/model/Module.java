@@ -7,6 +7,9 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents an academic module.
+ */
 @Data
 @Entity
 @Table(name = "modules")
