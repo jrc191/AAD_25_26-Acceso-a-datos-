@@ -1,4 +1,4 @@
-package com.jramcon398.models;
+package com.jramcon398.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

@@ -1,33 +1,22 @@
-package com.jramcon398.models;
+package com.jramcon398.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a module/course in the system.
- */
-
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "modules")
 public class Module {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Module name is required")
+    private String code;
     private String name;
-
     private Integer hours;
 
     @OneToMany(mappedBy = "module")
