@@ -67,10 +67,8 @@ public class JrcApplication implements CommandLineRunner {
                 .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
         log.info("Alumno recuperado: {}", miriam);
 
-        studentRepository.delete(miriam);
-        log.info("Alumno {} eliminado", miriam.getName());
-
-        log.info("Lanzando excepción para probar @Transactional...");
-        throw new RuntimeException("Forzando rollback de la transacción");
+        //studentRepository.delete(miriam);
+        //log.info("Alumno {} eliminado", miriam.getName());
+        //throw new RuntimeException("Forzando rollback de la transacción");
     }
 }

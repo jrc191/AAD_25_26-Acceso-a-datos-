@@ -3,6 +3,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/prueba
     username: admin
     password: admin
+    hikari:
+      maximum-pool-size: 5
     driver-class-name: org.postgresql.Driver
 
   jpa:
