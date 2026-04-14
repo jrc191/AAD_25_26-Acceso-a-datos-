@@ -11,3 +11,9 @@ recursos relacionados con el manejo y acceso a datos.
 - Cada rama puede tener su propia estructura de carpetas y archivos según las necesidades del curso.
 - Las ramas tienen nombres descriptivos que indican el tema o la práctica específica (feature/actX_Y).
 - `README.md`: Este archivo proporciona una visión general del repositorio y su contenido.
+
+## ACT 6.1 - APACHE KAFKA
+
+- La carpeta `ACT_6.1-APACHE-KAFKA/` contiene los ejercicios y prácticas relacionados con Apache Kafka, una plataforma
+  de streaming distribuida utilizada para construir aplicaciones de datos en tiempo real. Tiene un consumer y un
+  producer para enviar y recibir mensajes a través de Kafka.
