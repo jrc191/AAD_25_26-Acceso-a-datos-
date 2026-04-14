@@ -14,6 +14,6 @@ recursos relacionados con el manejo y acceso a datos.
 
 ## ACT 6.1 - APACHE KAFKA
 
-- La carpeta `ACT_6.1/` contiene los ejercicios y prácticas relacionados con Apache Kafka, una plataforma
+- La carpeta `ACT_6_1/` contiene los ejercicios y prácticas relacionados con Apache Kafka, una plataforma
   de streaming distribuida utilizada para construir aplicaciones de datos en tiempo real. Tiene un consumer y un
   producer para enviar y recibir mensajes a través de Kafka.
