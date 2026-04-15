@@ -1,3 +1,5 @@
+package com.jramcon398.str_producer.services;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;

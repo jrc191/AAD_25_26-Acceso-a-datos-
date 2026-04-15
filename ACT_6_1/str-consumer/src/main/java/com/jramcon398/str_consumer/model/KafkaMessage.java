@@ -1,3 +1,5 @@
+package com.jramcon398.str_consumer.model;
+
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

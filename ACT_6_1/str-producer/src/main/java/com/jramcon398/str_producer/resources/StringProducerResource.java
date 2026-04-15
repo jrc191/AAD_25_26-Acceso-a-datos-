@@ -1,3 +1,6 @@
+package  com.jramcon398.str_producer.resources;
+
+import com.jramcon398.str_producer.services.StringProducerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

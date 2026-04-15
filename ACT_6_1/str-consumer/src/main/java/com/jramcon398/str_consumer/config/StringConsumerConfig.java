@@ -1,4 +1,6 @@
-import lombok.extern.log4j.Log4j2;
+package com.jramcon398.str_consumer.config;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -13,7 +15,7 @@ import org.springframework.kafka.listener.RecordInterceptor;
 
 import java.util.HashMap;
 
-@Log4j2
+@Slf4j
 @Configuration
 public class StringConsumerConfig {
 

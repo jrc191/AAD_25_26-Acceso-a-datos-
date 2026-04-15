@@ -1,3 +1,5 @@
+package  com.jramcon398.str_producer.config;
+
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;

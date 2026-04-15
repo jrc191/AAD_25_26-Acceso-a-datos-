@@ -1,5 +1,8 @@
+package com.jramcon398.str_consumer.listeners;
+
+import com.jramcon398.str_consumer.model.KafkaMessage;
 import com.jramcon398.str_consumer.repository.KafkaMessageRepository;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
@@ -7,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@Log4j2
+@Slf4j
 @Component
 public class StrConsumerListener {
 

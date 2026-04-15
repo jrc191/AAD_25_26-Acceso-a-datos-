@@ -1,3 +1,5 @@
+package com.jramcon398.str_producer;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
