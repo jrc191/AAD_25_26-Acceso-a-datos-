@@ -1,9 +1,15 @@
 package com.jramcon398.str_consumer.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "kafka_messages")
 public class KafkaMessage {
@@ -18,32 +24,6 @@ public class KafkaMessage {
     @Column(name = "received_at")
     private LocalDateTime receivedAt;
 
-    public KafkaMessage() {
-    }
 
-    public KafkaMessage(String content, LocalDateTime receivedAt) {
-        this.content = content;
-        this.receivedAt = receivedAt;
-    }
 
-    // Getters y setters
-    public Long getId() {
-        return id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public LocalDateTime getReceivedAt() {
-        return receivedAt;
-    }
-
-    public void setReceivedAt(LocalDateTime receivedAt) {
-        this.receivedAt = receivedAt;
-    }
 }
